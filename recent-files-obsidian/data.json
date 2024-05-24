@@ -5,12 +5,12 @@
       "path": "assets/test.md"
     },
     {
-      "basename": "git",
-      "path": "docs/草稿/DevOps/git.md"
-    },
-    {
       "basename": "github",
       "path": "docs/草稿/DevOps/github.md"
+    },
+    {
+      "basename": "git",
+      "path": "docs/草稿/DevOps/git.md"
     },
     {
       "basename": "obsidian2",
