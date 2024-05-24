@@ -1,0 +1,19 @@
+{
+  "new-note-folder": "default_vault/看板",
+  "tag-colors": [],
+  "show-checkboxes": true,
+  "metadata-keys": [
+    {
+      "metadataKey": "df",
+      "label": "",
+      "shouldHideLabel": false,
+      "containsMarkdown": false
+    },
+    {
+      "metadataKey": "math",
+      "label": "",
+      "shouldHideLabel": false,
+      "containsMarkdown": true
+    }
+  ]
+}

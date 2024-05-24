@@ -1,0 +1,12 @@
+{
+  "indentsIfSelection": true,
+  "indentsIfSelectionOnlyForMultipleLines": true,
+  "useSpaces": false,
+  "alignSpaces": false,
+  "useHardSpace": true,
+  "spacesCount": 4,
+  "allowException": true,
+  "exceptionRegex": "^[\\s ]*(-|\\d+\\.)( \\[ \\])?\\s*$",
+  "useAdvancedTables": true,
+  "useOutlinerBetterTab": true
+}

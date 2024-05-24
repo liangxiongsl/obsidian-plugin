@@ -1,0 +1,15 @@
+{
+  "initialized": false,
+  "apiInitialized": false,
+  "defaultProjectName": "Inbox",
+  "automaticSynchronizationInterval": 300,
+  "todoistTasksData": {
+    "projects": [],
+    "tasks": [],
+    "events": []
+  },
+  "fileMetadata": {},
+  "enableFullVaultSync": false,
+  "statistics": {},
+  "debugMode": false
+}
