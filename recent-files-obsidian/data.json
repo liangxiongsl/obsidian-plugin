@@ -1,12 +1,12 @@
 {
   "recentFiles": [
     {
-      "basename": "test",
-      "path": "assets/test.md"
-    },
-    {
       "basename": "github",
       "path": "docs/草稿/DevOps/github.md"
+    },
+    {
+      "basename": "test",
+      "path": "assets/test.md"
     },
     {
       "basename": "git",
