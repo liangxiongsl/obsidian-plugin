@@ -5,8 +5,28 @@
       "path": "docs/锐化思维/tool/obsidian.api.md"
     },
     {
+      "basename": "js-tools-main",
+      "path": "docs/草稿/前端/js-tools/js-tools-main.md"
+    },
+    {
+      "basename": "obsidian2",
+      "path": "docs/锐化思维/tool/obsidian2.md"
+    },
+    {
+      "basename": "考研-main",
+      "path": "考研/考研-main.md"
+    },
+    {
+      "basename": "搞",
+      "path": "待办项目/毕业论文/搞.md"
+    },
+    {
       "basename": "readme",
       "path": "readme.md"
+    },
+    {
+      "basename": "obsidian",
+      "path": "docs/锐化思维/tool/obsidian.md"
     },
     {
       "basename": "wrod",
@@ -15,14 +35,6 @@
     {
       "basename": "程序员常识",
       "path": "docs-hwo/程序员常识.md"
-    },
-    {
-      "basename": "搞",
-      "path": "待办项目/毕业论文/搞.md"
-    },
-    {
-      "basename": "obsidian2",
-      "path": "docs/锐化思维/tool/obsidian2.md"
     },
     {
       "basename": "毕业设计-main",
@@ -45,10 +57,6 @@
       "path": "docs/草稿/前端/core/javascript.md"
     },
     {
-      "basename": "obsidian",
-      "path": "docs/锐化思维/tool/obsidian.md"
-    },
-    {
       "basename": "anki",
       "path": "docs/锐化思维/tool/anki.md"
     },
@@ -59,10 +67,6 @@
     {
       "basename": "fuck math",
       "path": "docs-hard/anki/fuck math.md"
-    },
-    {
-      "basename": "js-tools-main",
-      "path": "docs/草稿/前端/js-tools/js-tools-main.md"
     },
     {
       "basename": "node.js",

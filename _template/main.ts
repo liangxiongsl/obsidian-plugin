@@ -33,12 +33,10 @@ export default class MyPlugin extends Plugin {
 		// console.log(await req('canAddNotesWithErrorDetail', {notes: [{
 		// 	deckName: 'Default', modelName: "Basic", fields: {Front: 'jiba', Back: 'lao'}
 		// }]}))
-		let {scope} = this.app
-		let h = scope.register([], 'AudioVolumeMute', (evt, ctx)=>
-			console.log(evt)
-		)
-		setTimeout(()=>scope.unregister(h),5000)
-
+		// 打开自定义 ItemView
+		let leaf1 = this.app.workspace.getLeaf(true)
+		await leaf1.open(new MyItemView(leaf1,this))
+		this.app.workspace.setActiveLeaf(leaf1)
 
 
 		this.settingTab = new MyPluginSettingTab(this.app, this)
@@ -64,6 +62,7 @@ export default class MyPlugin extends Plugin {
 		// let leaf = this.app.workspace.getLeaf(true)
 		// await leaf.setViewState({type: 'my-view-id', active: true})
 		// this.app.workspace.revealLeaf(leaf)
+
 
 		// let leaf1 = this.app.workspace.createLeafBySplit(leaf, 'horizontal', true)
 		// await leaf1.setViewState({type: 'my-view-id', active: true})
@@ -230,6 +229,7 @@ class MyItemView extends ItemView{
 	}
 	async onOpen(){
 		createApp(sfc, {ob: this.ob}).mount(this.containerEl)
+
 		// let tb = document.createElement('table')
 		// for (let i = 0; i < 5; i++) {
 		// 	let tr = document.createElement('tr')
