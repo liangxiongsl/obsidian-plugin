@@ -5,16 +5,36 @@
       "path": "docs/锐化思维/tools/obsidian.md"
     },
     {
-      "basename": "锐化思维-main",
-      "path": "docs/锐化思维/锐化思维-main.md"
+      "basename": "web前端-main",
+      "path": "docs/草稿/前端/web前端-main.md"
     },
     {
-      "basename": "obsidian2",
-      "path": "docs/锐化思维/tools/obsidian2.md"
+      "basename": "ikun-ui",
+      "path": "docs/草稿/前端/ui/ikun-ui.md"
+    },
+    {
+      "basename": "web-main",
+      "path": "docs/草稿/前端/core/web-main.md"
+    },
+    {
+      "basename": "javascript",
+      "path": "docs/草稿/前端/core/javascript.md"
     },
     {
       "basename": "github",
       "path": "docs/草稿/DevOps/github.md"
+    },
+    {
+      "basename": "锐化思维-main",
+      "path": "docs/锐化思维/锐化思维-main.md"
+    },
+    {
+      "basename": "git",
+      "path": "docs/草稿/DevOps/git.md"
+    },
+    {
+      "basename": "obsidian2",
+      "path": "docs/锐化思维/tools/obsidian2.md"
     },
     {
       "basename": "api-keys",
@@ -31,10 +51,6 @@
     {
       "basename": "github.api",
       "path": "docs/草稿/DevOps/github.api.md"
-    },
-    {
-      "basename": "git",
-      "path": "docs/草稿/DevOps/git.md"
     },
     {
       "basename": "vim",
@@ -101,20 +117,12 @@
       "path": "docs/草稿/前端/core/typescript.md"
     },
     {
-      "basename": "web前端-main",
-      "path": "docs/草稿/前端/web前端-main.md"
-    },
-    {
       "basename": "智慧校园管理系统",
       "path": "project/web/智慧校园管理系统.md"
     },
     {
       "basename": "正则表达式",
       "path": "docs/正则表达式.md"
-    },
-    {
-      "basename": "web-main",
-      "path": "docs/草稿/前端/core/web-main.md"
     },
     {
       "basename": "web安全",
@@ -139,10 +147,6 @@
     {
       "basename": "html",
       "path": "docs/草稿/前端/core/html.md"
-    },
-    {
-      "basename": "javascript",
-      "path": "docs/草稿/前端/core/javascript.md"
     },
     {
       "basename": "Django--ex",
@@ -195,10 +199,6 @@
     {
       "basename": "readme",
       "path": "project/readme.md"
-    },
-    {
-      "basename": "搞",
-      "path": "待办项目/毕业论文/搞.md"
     }
   ],
   "omittedPaths": [],
