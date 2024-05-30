@@ -1,200 +1,204 @@
 {
   "recentFiles": [
     {
-      "basename": "obsidian.api",
-      "path": "docs/锐化思维/tool/obsidian.api.md"
-    },
-    {
-      "basename": "js-tools-main",
-      "path": "docs/草稿/前端/js-tools/js-tools-main.md"
-    },
-    {
-      "basename": "obsidian2",
-      "path": "docs/锐化思维/tool/obsidian2.md"
-    },
-    {
-      "basename": "考研-main",
-      "path": "考研/考研-main.md"
-    },
-    {
-      "basename": "搞",
-      "path": "待办项目/毕业论文/搞.md"
-    },
-    {
-      "basename": "readme",
-      "path": "readme.md"
-    },
-    {
       "basename": "obsidian",
-      "path": "docs/锐化思维/tool/obsidian.md"
-    },
-    {
-      "basename": "wrod",
-      "path": "wrod.md"
-    },
-    {
-      "basename": "程序员常识",
-      "path": "docs-hwo/程序员常识.md"
-    },
-    {
-      "basename": "毕业设计-main",
-      "path": "待办项目/毕业论文/毕业设计-main.md"
-    },
-    {
-      "basename": "axios",
-      "path": "docs/草稿/前端/js-tools/axios.md"
-    },
-    {
-      "basename": "obsidian--anki",
-      "path": "docs/锐化思维/plugin-connector/obsidian--anki.md"
-    },
-    {
-      "basename": "typescript",
-      "path": "docs/草稿/前端/core/typescript.md"
-    },
-    {
-      "basename": "javascript",
-      "path": "docs/草稿/前端/core/javascript.md"
-    },
-    {
-      "basename": "anki",
-      "path": "docs/锐化思维/tool/anki.md"
-    },
-    {
-      "basename": "开发者-main",
-      "path": "docs/草稿/开发者-main.md"
-    },
-    {
-      "basename": "fuck math",
-      "path": "docs-hard/anki/fuck math.md"
-    },
-    {
-      "basename": "node.js",
-      "path": "docs/草稿/前端/core/node.js.md"
+      "path": "docs/锐化思维/tools/obsidian.md"
     },
     {
       "basename": "锐化思维-main",
       "path": "docs/锐化思维/锐化思维-main.md"
     },
     {
-      "basename": "element",
-      "path": "docs/草稿/前端/ui/element.md"
-    },
-    {
-      "basename": "jQuery",
-      "path": "docs/草稿/前端/js-tools/jQuery.md"
-    },
-    {
-      "basename": "dict_",
-      "path": "quick/exe/link to dict/dict_.md"
-    },
-    {
-      "basename": "txt",
-      "path": "quick/exe/link to dict/txt.md"
-    },
-    {
-      "basename": "vue3.xx",
-      "path": "docs/草稿/前端/CSR/vue/vue3.xx.md"
-    },
-    {
-      "basename": "vue3.x",
-      "path": "docs/草稿/前端/CSR/vue/vue3.x.md"
-    },
-    {
-      "basename": "vue3.api",
-      "path": "docs/草稿/前端/CSR/vue/vue3.api.md"
+      "basename": "obsidian2",
+      "path": "docs/锐化思维/tools/obsidian2.md"
     },
     {
       "basename": "github",
       "path": "docs/草稿/DevOps/github.md"
     },
     {
+      "basename": "api-keys",
+      "path": "docs-hwo/pwd/api-keys.md"
+    },
+    {
+      "basename": "PicGo",
+      "path": "docs/锐化思维/quick-tools/PicGo.md"
+    },
+    {
+      "basename": "shareX",
+      "path": "docs/锐化思维/quick-tools/shareX.md"
+    },
+    {
+      "basename": "github.api",
+      "path": "docs/草稿/DevOps/github.api.md"
+    },
+    {
       "basename": "git",
       "path": "docs/草稿/DevOps/git.md"
     },
     {
-      "basename": "题目",
-      "path": "docs-hard/anki/题目.md"
+      "basename": "vim",
+      "path": "docs/锐化思维/tools/vim.md"
     },
     {
-      "basename": "learn-main",
-      "path": "docs/锐化思维/tool/learn-main.md"
-    },
-    {
-      "basename": "mathjax",
-      "path": "assets/js/mathjax.js"
-    },
-    {
-      "basename": "搞钱",
-      "path": "docs-hwo/搞钱/搞钱.md"
+      "basename": "obsidian--anki",
+      "path": "docs/锐化思维/plugin-connector/obsidian--anki.md"
     },
     {
       "basename": "css",
       "path": "docs/草稿/前端/core/css.md"
     },
     {
-      "basename": "Tailwind-css",
-      "path": "docs/草稿/前端/css/Tailwind-css.md"
+      "basename": "友链",
+      "path": "docs-hwo/杂/友链.md"
     },
     {
-      "basename": "模式匹配",
-      "path": "docs/锐化思维/模式匹配.md"
+      "basename": "坤",
+      "path": "docs-hwo/坤.md"
     },
     {
-      "basename": "todo",
-      "path": "todo.md"
+      "basename": "话题",
+      "path": "docs-hwo/话题.md"
     },
     {
-      "basename": "Recording 20240523111003",
-      "path": "assets/voice/Recording 20240523111003.webm"
+      "basename": "法律",
+      "path": "docs-hwo/法律.md"
     },
     {
-      "basename": "define",
-      "path": "docs-hard/anki/define.md"
+      "basename": "keys",
+      "path": "docs-hwo/pwd/keys.md"
     },
     {
-      "basename": "back",
-      "path": "docs-hard/back.md"
+      "basename": "信息和资源",
+      "path": "trash/default_vault/core/信息和资源.md"
     },
     {
       "basename": "机场",
       "path": "docs/浏览器/机场.md"
     },
     {
-      "basename": "test.excalidraw",
-      "path": "assets-local/Excalidraw/test.excalidraw.md"
+      "basename": "信息和资源",
+      "path": "trash/信息和资源.md"
     },
     {
-      "basename": "ExcalidrawStartup",
-      "path": "assets-local/Excalidraw/ExcalidrawStartup.md"
+      "basename": "obsidian.api",
+      "path": "docs/锐化思维/tools/obsidian.api.md"
     },
     {
-      "basename": "Drawing 2023-12-05 17.27.26.excalidraw",
-      "path": "assets-local/Excalidraw/Drawing 2023-12-05 17.27.26.excalidraw.md"
+      "basename": "DevOps-main",
+      "path": "docs/草稿/DevOps/DevOps-main.md"
     },
     {
-      "basename": "Drawing 2024-01-03 21.00.39.excalidraw",
-      "path": "assets-local/Excalidraw/Drawing 2024-01-03 21.00.39.excalidraw.md"
+      "basename": "anki",
+      "path": "docs/锐化思维/tools/anki.md"
+    },
+    {
+      "basename": "fuck math",
+      "path": "docs-hard/anki/fuck math.md"
+    },
+    {
+      "basename": "typescript",
+      "path": "docs/草稿/前端/core/typescript.md"
+    },
+    {
+      "basename": "web前端-main",
+      "path": "docs/草稿/前端/web前端-main.md"
+    },
+    {
+      "basename": "智慧校园管理系统",
+      "path": "project/web/智慧校园管理系统.md"
+    },
+    {
+      "basename": "正则表达式",
+      "path": "docs/正则表达式.md"
+    },
+    {
+      "basename": "web-main",
+      "path": "docs/草稿/前端/core/web-main.md"
+    },
+    {
+      "basename": "web安全",
+      "path": "docs/草稿/前端/core/web安全.md"
+    },
+    {
+      "basename": "node.js",
+      "path": "docs/草稿/前端/core/node.js.md"
+    },
+    {
+      "basename": "js-tools-main",
+      "path": "docs/草稿/前端/js-tools/js-tools-main.md"
+    },
+    {
+      "basename": "ad-note",
+      "path": "trash/default_vault/templates/admonition/ad-note.md"
+    },
+    {
+      "basename": "js-web-api",
+      "path": "docs/草稿/前端/core/js-web-api.md"
+    },
+    {
+      "basename": "html",
+      "path": "docs/草稿/前端/core/html.md"
+    },
+    {
+      "basename": "javascript",
+      "path": "docs/草稿/前端/core/javascript.md"
+    },
+    {
+      "basename": "Django--ex",
+      "path": "docs/草稿/后端/python/django/Django--ex.md"
+    },
+    {
+      "basename": "10. 参数方程&极坐标",
+      "path": "考研/trash/数学/微积分/10. 参数方程&极坐标.md"
+    },
+    {
+      "basename": "chatgpt",
+      "path": "docs/ai/chatgpt.md"
+    },
+    {
+      "basename": "word",
+      "path": "word.md"
+    },
+    {
+      "basename": "assets-main",
+      "path": "assets/assets-main.md"
     },
     {
       "basename": "Pasted Image 20240521113912_615",
       "path": "assets/Pasted Image 20240521113912_615.png"
     },
     {
-      "basename": "大脑知识流图",
-      "path": "assets/exca/大脑知识流图.md"
+      "basename": "readme",
+      "path": "readme.md"
     },
     {
-      "basename": "algo-main",
-      "path": "algo/algo-main.md"
+      "basename": "毕业设计-main",
+      "path": "待办项目/毕业论文/毕业设计-main.md"
+    },
+    {
+      "basename": "vault-main",
+      "path": "vault-main.md"
+    },
+    {
+      "basename": "思考",
+      "path": "docs/项目/思考.md"
+    },
+    {
+      "basename": "django2",
+      "path": "docs/草稿/后端/python/django/django2.md"
+    },
+    {
+      "basename": "未命名",
+      "path": "docs/项目/未命名.md"
     },
     {
       "basename": "readme",
-      "path": "docs/readme.md"
+      "path": "project/readme.md"
     },
     {
-      "basename": "web前端-main",
-      "path": "docs/草稿/前端/web前端-main.md"
+      "basename": "搞",
+      "path": "待办项目/毕业论文/搞.md"
     }
   ],
   "omittedPaths": [],

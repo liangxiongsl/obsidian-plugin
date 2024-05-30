@@ -30,13 +30,20 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 export default class MyPlugin extends Plugin {
 
 	async onload() {
-		// console.log(await req('canAddNotesWithErrorDetail', {notes: [{
-		// 	deckName: 'Default', modelName: "Basic", fields: {Front: 'jiba', Back: 'lao'}
-		// }]}))
-		// 打开自定义 ItemView
-		let leaf1 = this.app.workspace.getLeaf(true)
-		await leaf1.open(new MyItemView(leaf1,this))
-		this.app.workspace.setActiveLeaf(leaf1)
+		console.log('onload')
+		let cms = document.getElementsByClassName('cm-content')
+		// console.log(cms[0].children.length)
+		let els = cms[0].children
+		for (let i = 0; i < els.length; i++) {
+			let el = els[i]
+			// el.innerHTML = el.innerHTML.replace(/a/, '[a]')
+			// console.log(el.innerHTML.replace(/>([^<>]*)</, '>$11<'))
+		}
+		let spans = cms[0].getElementsByTagName('span')
+		for (let i = 0; i < spans.length; i++) {
+			let v = spans[i]
+			console.log(v.innerHTML)
+		}
 
 
 		this.settingTab = new MyPluginSettingTab(this.app, this)
@@ -57,11 +64,28 @@ export default class MyPlugin extends Plugin {
 
 		new MyNotice((el)=>el.setText('example'))
 
-		this.registerView('my-view-id', (leaf)=>new MyItemView(leaf, this))
+		this.registerView('my-view-type', (leaf)=>new MyItemView(leaf, this))
+		// let leaf = this.app.workspace.getRightLeaf(false)
+		// leaf?.setViewState({type: 'my-view-type', state: {hello: 'world'}}).then(()=>leaf)
+		this.register(()=>{
+			console.log('unload')
+			// console.log(this.app.workspace.getLeavesOfType('my-view-type'))
+			this.app.workspace.getLeavesOfType('my-view-type').forEach(v=>v.detach())
+			// this.app.workspace.detachLeavesOfType('my-views-type')
+		})
+		let f = this.app.vault.getFileByPath('word.md')
+		if (f){
+			// let l = this.app.workspace.getLeaf('tab')
+			// await l.setViewState({type: 'my-view-type'})
+			// this.app.workspace.setActiveLeaf(l)
+		}
 
-		// let leaf = this.app.workspace.getLeaf(true)
+
+		// this.app.workspace.getLeavesOfType('my-view-id').forEach((v)=>v.detach())
+
 		// await leaf.setViewState({type: 'my-view-id', active: true})
 		// this.app.workspace.revealLeaf(leaf)
+		// console.log(this.app.workspace.getLeafById('my-view-id'))
 
 
 		// let leaf1 = this.app.workspace.createLeafBySplit(leaf, 'horizontal', true)
@@ -128,8 +152,6 @@ export default class MyPlugin extends Plugin {
 				})
 			table.setAttr('style', 'width: 95%')
 		})
-
-
 	}
 
 	onunload() {
@@ -137,6 +159,7 @@ export default class MyPlugin extends Plugin {
 	}
 
 
+	// @设置
 	settings: MyPluginSettings;
 	settingTab: MyPluginSettingTab;
 	async load_settings(){
@@ -158,6 +181,7 @@ export default class MyPlugin extends Plugin {
 			})
 	}
 
+	// @ribbon-上下文菜单
 	ribbon_menu: Menu;
 	init_menu(){
 		this.ribbon_menu = new Menu()
@@ -172,6 +196,7 @@ export default class MyPlugin extends Plugin {
 
 	}
 
+	// @模态
 	modal: MyModal;
 	init_modal(){
 		this.modal = new MyModal(this.app)
@@ -185,6 +210,16 @@ export default class MyPlugin extends Plugin {
 	}
 }
 
+class MyPluginSettingTab extends PluginSettingTab {
+	plugin: MyPlugin
+	constructor(app: App, plugin: MyPlugin) {
+		super(app, plugin)
+		this.plugin = plugin
+	}
+	async display() {
+		await this.plugin.load_settings()
+	}
+}
 class MyModal extends Modal {
 	onOpen() {
 		const {contentEl} = this;
@@ -197,16 +232,6 @@ class MyModal extends Modal {
 	}
 }
 
-class MyPluginSettingTab extends PluginSettingTab {
-	plugin: MyPlugin
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin)
-		this.plugin = plugin
-	}
-	async display() {
-		await this.plugin.load_settings()
-	}
-}
 
 class MyNotice extends Notice{
 	constructor(cb: (el: HTMLElement)=>void, duration?: number) {
@@ -228,7 +253,13 @@ class MyItemView extends ItemView{
 		return "my-view-type";
 	}
 	async onOpen(){
-		createApp(sfc, {ob: this.ob}).mount(this.containerEl)
+		// this.addAction('dice', 'jiba', ()=>0)
+		createApp(sfc, {ob: this.ob}).mount(this.contentEl)
+		let h = this.containerEl.children[0]
+		let el = this.containerEl.getElementsByClassName('cm-editor')
+
+
+		// createApp(sfc, {ob: this.ob}).mount(h.children[2])
 
 		// let tb = document.createElement('table')
 		// for (let i = 0; i < 5; i++) {

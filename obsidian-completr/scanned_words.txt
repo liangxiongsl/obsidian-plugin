@@ -3783,6 +3783,7 @@ getEaseFactors
 getIntervals
 governing
 getElementsByTagName
+gitmodule
 Git
 GET
 Gooreplacer
@@ -7385,6 +7386,10 @@ bfj
 bYN
 bYH
 become
+backup
+bare
+blob
+bug
 main
 media
 markdown
@@ -8643,6 +8648,8 @@ mtPf
 might
 mod
 may
+merge
+mklink
 API
 Accept
 AvASQWST
@@ -9876,6 +9883,7 @@ Anki
 AsciiMath
 Axios
 Alk
+Alnavar
 types
 text
 type
@@ -11067,6 +11075,7 @@ than
 testfile
 tAJ
 tQV
+todolist
 parameters
 per
 page
@@ -17077,6 +17086,7 @@ ignore
 ignored
 implied
 imN
+ignorecase
 Octokit
 OpenAPI
 OpenGL
@@ -18188,6 +18198,7 @@ OcC
 Osz
 Oiu
 Overall
+Omit
 from
 file
 files
@@ -19403,6 +19414,8 @@ findCards
 forgetCards
 formatting
 fuck
+foreach
+filemode
 const
 content
 connection
@@ -20787,6 +20800,7 @@ compliance
 cdnjs
 cloudflare
 currentScript
+clone
 request
 repos
 repo
@@ -22067,6 +22081,8 @@ ruler
 relearnCards
 retry
 recognise
+repositoryformatversion
+remotes
 liangxiongsl
 lAAKGe
 loader
@@ -23294,6 +23310,9 @@ like
 looks
 law
 limitations
+links
+lagrange
+logallrefupdates
 POST
 PyQt
 Python
@@ -28030,6 +28049,7 @@ heading
 hasOwnProperty
 https
 huFQ
+heads
 version
 vue
 vuex
@@ -31759,6 +31779,8 @@ suspended
 specific
 substr
 sdm
+submodule
+symlinks
 eqT
 easyui
 export
@@ -33052,6 +33074,7 @@ easier
 either
 eOYeF
 eer
+excludesFile
 BlbkFJ
 Bye
 Blackburn
@@ -34279,6 +34302,7 @@ BopT
 BGlW
 BEGIN
 BASIS
+Babu
 xc
 xlsx
 xxx
@@ -36625,6 +36649,7 @@ MetadataCache
 Mwul
 MMYf
 MCns
+MUA
 QQ
 QuerySet
 QueryDict
@@ -45000,6 +45025,7 @@ NPN
 NwH
 NGL
 Neuracache
+Narendra
 URLCONF
 URLconfs
 USER
@@ -46191,6 +46217,7 @@ UxT
 UEi
 Unless
 UkS
+Uday
 IntegerField
 Introduction
 It
@@ -49759,6 +49786,7 @@ LxR
 LSn
 Licensed
 License
+LaTeX
 Shading
 Simon
 Snyder
@@ -52361,6 +52389,7 @@ Copyright
 Consortium
 CONDITIONS
 CIpv
+CRD
 Think
 Text
 Thinking
@@ -55811,6 +55840,8 @@ Khm
 KmY
 KIND
 KQYk
+Kruthika
+Kumar
 Wasserman
 Watson
 Wayne
