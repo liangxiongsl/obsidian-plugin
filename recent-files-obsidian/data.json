@@ -1,8 +1,36 @@
 {
   "recentFiles": [
     {
+      "basename": "Sass",
+      "path": "docs/草稿/前端/css/Sass.md"
+    },
+    {
+      "basename": "css",
+      "path": "docs/草稿/前端/core/css.md"
+    },
+    {
+      "basename": "css-api",
+      "path": "docs/草稿/前端/css/css-api.md"
+    },
+    {
       "basename": "obsidian",
       "path": "docs/锐化思维/tools/obsidian.md"
+    },
+    {
+      "basename": "obsidian--anki",
+      "path": "docs/锐化思维/plugin-connector/obsidian--anki.md"
+    },
+    {
+      "basename": "obsidian.api",
+      "path": "docs/锐化思维/tools/obsidian.api.md"
+    },
+    {
+      "basename": "git",
+      "path": "docs/草稿/DevOps/git.md"
+    },
+    {
+      "basename": "github",
+      "path": "docs/草稿/DevOps/github.md"
     },
     {
       "basename": "web前端-main",
@@ -21,16 +49,8 @@
       "path": "docs/草稿/前端/core/javascript.md"
     },
     {
-      "basename": "github",
-      "path": "docs/草稿/DevOps/github.md"
-    },
-    {
       "basename": "锐化思维-main",
       "path": "docs/锐化思维/锐化思维-main.md"
-    },
-    {
-      "basename": "git",
-      "path": "docs/草稿/DevOps/git.md"
     },
     {
       "basename": "obsidian2",
@@ -55,14 +75,6 @@
     {
       "basename": "vim",
       "path": "docs/锐化思维/tools/vim.md"
-    },
-    {
-      "basename": "obsidian--anki",
-      "path": "docs/锐化思维/plugin-connector/obsidian--anki.md"
-    },
-    {
-      "basename": "css",
-      "path": "docs/草稿/前端/core/css.md"
     },
     {
       "basename": "友链",
@@ -95,10 +107,6 @@
     {
       "basename": "信息和资源",
       "path": "trash/信息和资源.md"
-    },
-    {
-      "basename": "obsidian.api",
-      "path": "docs/锐化思维/tools/obsidian.api.md"
     },
     {
       "basename": "DevOps-main",
@@ -191,14 +199,6 @@
     {
       "basename": "django2",
       "path": "docs/草稿/后端/python/django/django2.md"
-    },
-    {
-      "basename": "未命名",
-      "path": "docs/项目/未命名.md"
-    },
-    {
-      "basename": "readme",
-      "path": "project/readme.md"
     }
   ],
   "omittedPaths": [],

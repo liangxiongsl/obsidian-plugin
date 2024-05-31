@@ -6,10 +6,8 @@ import {
 	PluginSettingTab,
 	Setting,
 	Menu,
-	MarkdownEditView,
-	MarkdownPreviewView, TFile, Vault
 } from 'obsidian';
-import {WorkspaceLeaf,View,ItemView,MarkdownView} from 'obsidian'
+import {WorkspaceLeaf,ItemView} from 'obsidian'
 import {createApp} from 'vue'
 import sfc from './modules/sfc.vue'
 import http, {req} from "config/anki-req";
