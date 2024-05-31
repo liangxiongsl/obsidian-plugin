@@ -1,24 +1,64 @@
 {
   "recentFiles": [
     {
-      "basename": "Sass",
-      "path": "docs/草稿/前端/css/Sass.md"
-    },
-    {
       "basename": "css",
       "path": "docs/草稿/前端/core/css.md"
-    },
-    {
-      "basename": "css-api",
-      "path": "docs/草稿/前端/css/css-api.md"
     },
     {
       "basename": "obsidian",
       "path": "docs/锐化思维/tools/obsidian.md"
     },
     {
+      "basename": "python 1",
+      "path": "docs/草稿/后端/lang/python 1.md"
+    },
+    {
+      "basename": "Sass",
+      "path": "docs/草稿/前端/css/Sass.md"
+    },
+    {
+      "basename": "杂记",
+      "path": "docs-hwo/杂记.md"
+    },
+    {
+      "basename": "url-collection",
+      "path": "docs-hwo/url-collection.md"
+    },
+    {
+      "basename": "通用工具",
+      "path": "docs-hwo/通用工具.md"
+    },
+    {
+      "basename": "坤",
+      "path": "docs-hwo/坤.md"
+    },
+    {
+      "basename": "程序员常识",
+      "path": "docs-hwo/程序员常识.md"
+    },
+    {
+      "basename": "readme",
+      "path": "quick/exe/chomp/readme.md"
+    },
+    {
+      "basename": "readme",
+      "path": "quick/exe/readme.md"
+    },
+    {
+      "basename": "node.js",
+      "path": "docs/草稿/前端/core/node.js.md"
+    },
+    {
+      "basename": "搞",
+      "path": "待办项目/毕业论文/搞.md"
+    },
+    {
       "basename": "obsidian--anki",
       "path": "docs/锐化思维/plugin-connector/obsidian--anki.md"
+    },
+    {
+      "basename": "css-api",
+      "path": "docs/草稿/前端/css/css-api.md"
     },
     {
       "basename": "obsidian.api",
@@ -81,10 +121,6 @@
       "path": "docs-hwo/杂/友链.md"
     },
     {
-      "basename": "坤",
-      "path": "docs-hwo/坤.md"
-    },
-    {
       "basename": "话题",
       "path": "docs-hwo/话题.md"
     },
@@ -137,10 +173,6 @@
       "path": "docs/草稿/前端/core/web安全.md"
     },
     {
-      "basename": "node.js",
-      "path": "docs/草稿/前端/core/node.js.md"
-    },
-    {
       "basename": "js-tools-main",
       "path": "docs/草稿/前端/js-tools/js-tools-main.md"
     },
@@ -167,38 +199,6 @@
     {
       "basename": "chatgpt",
       "path": "docs/ai/chatgpt.md"
-    },
-    {
-      "basename": "word",
-      "path": "word.md"
-    },
-    {
-      "basename": "assets-main",
-      "path": "assets/assets-main.md"
-    },
-    {
-      "basename": "Pasted Image 20240521113912_615",
-      "path": "assets/Pasted Image 20240521113912_615.png"
-    },
-    {
-      "basename": "readme",
-      "path": "readme.md"
-    },
-    {
-      "basename": "毕业设计-main",
-      "path": "待办项目/毕业论文/毕业设计-main.md"
-    },
-    {
-      "basename": "vault-main",
-      "path": "vault-main.md"
-    },
-    {
-      "basename": "思考",
-      "path": "docs/项目/思考.md"
-    },
-    {
-      "basename": "django2",
-      "path": "docs/草稿/后端/python/django/django2.md"
     }
   ],
   "omittedPaths": [],

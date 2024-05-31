@@ -2564,6 +2564,7 @@ agreed
 appended
 aUr
 aDX
+avprobe
 git
 github
 gitee
@@ -11077,6 +11078,8 @@ testfile
 tAJ
 tQV
 todolist
+tkinter
+tts
 parameters
 per
 page
@@ -12403,6 +12406,10 @@ possible
 paragraph
 paragraphs
 pjT
+pyperclip
+pandas
+pixiv
+pydub
 npm
 new
 null
@@ -19417,6 +19424,7 @@ formatting
 fuck
 foreach
 filemode
+ffmpeg
 const
 content
 connection
@@ -24474,6 +24482,7 @@ PFp
 Pinia
 Plus
 PyInstaller
+PyAutoGUI
 Hello
 HOST
 High
@@ -37823,6 +37832,8 @@ Qwgt
 QEB
 Qfv
 QtzB
+QWidget
+QVBoxLayout
 Django
 Default
 DATABASES
@@ -40164,6 +40175,7 @@ qMX
 qAF
 question
 qWLM
+qtawesome
 download
 default
 django
