@@ -10,8 +10,9 @@ import {
 import {WorkspaceLeaf,ItemView} from 'obsidian'
 import {createApp} from 'vue'
 import sfc from './modules/sfc.vue'
-import http, {req} from "config/anki-req";
+import http, {req} from "apis/anki-req";
 import {propsToAttrMap} from "@vue/shared";
+import {mode_action} from 'apis/els'
 
 
 // Remember to rename these classes and interfaces!
@@ -29,19 +30,6 @@ export default class MyPlugin extends Plugin {
 
 	async onload() {
 		console.log('onload')
-		let cms = document.getElementsByClassName('cm-content')
-		// console.log(cms[0].children.length)
-		let els = cms[0].children
-		for (let i = 0; i < els.length; i++) {
-			let el = els[i]
-			// el.innerHTML = el.innerHTML.replace(/a/, '[a]')
-			// console.log(el.innerHTML.replace(/>([^<>]*)</, '>$11<'))
-		}
-		let spans = cms[0].getElementsByTagName('span')
-		for (let i = 0; i < spans.length; i++) {
-			let v = spans[i]
-			console.log(v.innerHTML)
-		}
 
 
 		this.settingTab = new MyPluginSettingTab(this.app, this)
@@ -51,14 +39,31 @@ export default class MyPlugin extends Plugin {
 
 		this.init_modal()
 
-		let rb = this.addRibbonIcon('bar-chart-horizontal-big', 'example ribbon icon', (e)=> {
+		let rb = this.addRibbonIcon('', 'example ribbon icon', (e)=> {
 			new Notice('example ribbon icon')
 		})
+		mode_action(rb.createEl('div'))
 		let sb = this.addStatusBarItem()
-		// sb.createEl('button', '', (el)=>{
-		// 	el.innerHTML = 'modal'
-		// 	el.onclick=()=>this.modal.open()
-		// })
+		mode_action(sb.createEl('div'))
+		let add_action = ()=>{
+			let els = document.getElementsByClassName('view-actions')
+			for (let i = 0; i < els.length; i++) {
+				let el = els[i]
+				// if (!el.getElementsByClassName('mode_action').length){
+				// 	let action_el = document.createElement('div')
+				// 	mode_action(action_el)
+				// 	el.insertAdjacentElement('afterbegin', action_el)
+				// }
+				let setting_el = el.querySelector('[aria-label="更多选项"]')
+				if (setting_el && !el.getElementsByClassName('mode_action').length){
+					let action_el = document.createElement('div') as HTMLElement
+					mode_action(action_el)
+					setting_el.insertAdjacentElement('beforebegin', action_el)
+				}
+			}
+		}
+		this.registerEvent(this.app.workspace.on('file-open',()=>add_action()))
+		add_action()
 
 		new MyNotice((el)=>el.setText('example'))
 
@@ -253,8 +258,6 @@ class MyItemView extends ItemView{
 	async onOpen(){
 		// this.addAction('dice', 'jiba', ()=>0)
 		createApp(sfc, {ob: this.ob}).mount(this.contentEl)
-		let h = this.containerEl.children[0]
-		let el = this.containerEl.getElementsByClassName('cm-editor')
 
 
 		// createApp(sfc, {ob: this.ob}).mount(h.children[2])

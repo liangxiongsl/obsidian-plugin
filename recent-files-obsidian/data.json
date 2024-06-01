@@ -1,12 +1,48 @@
 {
   "recentFiles": [
     {
+      "basename": "obsidian--anki",
+      "path": "docs/锐化思维/plugin-connector/obsidian--anki.md"
+    },
+    {
       "basename": "css",
       "path": "docs/草稿/前端/core/css.md"
     },
     {
       "basename": "obsidian",
       "path": "docs/锐化思维/tools/obsidian.md"
+    },
+    {
+      "basename": "obsidian.api",
+      "path": "docs/锐化思维/tools/obsidian.api.md"
+    },
+    {
+      "basename": "hehe",
+      "path": "docs-me/intrest/hehe.md"
+    },
+    {
+      "basename": "html",
+      "path": "docs/草稿/前端/core/html.md"
+    },
+    {
+      "basename": "http",
+      "path": "docs/草稿/前端/core/http.md"
+    },
+    {
+      "basename": "sd",
+      "path": "待办项目/“芯享班”/sd.md"
+    },
+    {
+      "basename": "Tailwind-css",
+      "path": "docs/草稿/前端/css/Tailwind-css.md"
+    },
+    {
+      "basename": "web前端-main",
+      "path": "docs/草稿/前端/web前端-main.md"
+    },
+    {
+      "basename": "css-api",
+      "path": "docs/草稿/前端/css/css-api.md"
     },
     {
       "basename": "python 1",
@@ -53,28 +89,12 @@
       "path": "待办项目/毕业论文/搞.md"
     },
     {
-      "basename": "obsidian--anki",
-      "path": "docs/锐化思维/plugin-connector/obsidian--anki.md"
-    },
-    {
-      "basename": "css-api",
-      "path": "docs/草稿/前端/css/css-api.md"
-    },
-    {
-      "basename": "obsidian.api",
-      "path": "docs/锐化思维/tools/obsidian.api.md"
-    },
-    {
       "basename": "git",
       "path": "docs/草稿/DevOps/git.md"
     },
     {
       "basename": "github",
       "path": "docs/草稿/DevOps/github.md"
-    },
-    {
-      "basename": "web前端-main",
-      "path": "docs/草稿/前端/web前端-main.md"
     },
     {
       "basename": "ikun-ui",
@@ -179,26 +199,6 @@
     {
       "basename": "ad-note",
       "path": "trash/default_vault/templates/admonition/ad-note.md"
-    },
-    {
-      "basename": "js-web-api",
-      "path": "docs/草稿/前端/core/js-web-api.md"
-    },
-    {
-      "basename": "html",
-      "path": "docs/草稿/前端/core/html.md"
-    },
-    {
-      "basename": "Django--ex",
-      "path": "docs/草稿/后端/python/django/Django--ex.md"
-    },
-    {
-      "basename": "10. 参数方程&极坐标",
-      "path": "考研/trash/数学/微积分/10. 参数方程&极坐标.md"
-    },
-    {
-      "basename": "chatgpt",
-      "path": "docs/ai/chatgpt.md"
     }
   ],
   "omittedPaths": [],
