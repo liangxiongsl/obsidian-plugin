@@ -1,10 +1,13 @@
-.lx::before{content: '--> '}
-.lx::after{content: ' <--'}
+/*.lx::before{content: '--> '}*/
+/*.lx::after{content: ' <--'}*/
 
-.l1{color: green !important;}
-/*.l1>li *{color: unset}*/
-/*.l2>li{color: revert}*/
-/*.l2>li *{color: inherit}*/
-body :not(.li){
-	color: red;
-}
+/*.l1{color: green !important;}*/
+/*!*.l1>li *{color: unset}*!*/
+/*!*.l2>li{color: revert}*!*/
+/*!*.l2>li *{color: inherit}*!*/
+/*body :not(.li){*/
+/*	color: red;*/
+/*}*/
+
+
+

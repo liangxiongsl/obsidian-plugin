@@ -6,7 +6,6 @@ let http = axios.create({
 http.defaults.baseURL = 'http://localhost:8765/'
 // http.interceptors.response.use((res)=>res.data)
 
-
 export default http
 
 type CardAction = 'getEaseFactors' | 'setEaseFactors' | 'setSpecificValueOfCard' | 'suspend' | 'unsuspend' |

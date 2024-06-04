@@ -1,0 +1,40 @@
+<div id="root">
+
+</div>
+
+<script>
+	let map = [0,1,2,3,4,5,6,7,8,9,'a','b','c','d','e','f']
+	let ok = false
+	// map.forEach((i)=>{
+	setTimeout(()=>{
+		map.forEach((j)=>{
+			if (ok) return
+			map.forEach((k)=>{
+				if (ok) return
+				map.forEach((l)=>{
+					let id = `1f${j}${k}${l}`
+					if (id === '1fa97'){
+						ok = true
+						return
+					}
+					let el = document.createElement('span')
+					el.innerHTML = `&#x${id};`
+					document.body.appendChild(el)
+				})
+			})
+		})
+		let frames = ['1f55b','1f550','1f551','1f552','1f553','1f554','1f555','1f556','1f557','1f558','1f559','1f55a']
+		let t = 0
+		setInterval(()=>{
+			let ss = document.styleSheets[0]
+			ss.removeRule(ss.cssRules.length-1)
+			ss.insertRule(`#root::before{ content: '\\${frames[t]}'; font-size: 20px }`, ss.cssRules.length)
+			t = (t+1)%12
+		},1000)
+
+	},0)
+	// })
+</script>
+<style>
+	/*@import "sd.css";*/
+</style>

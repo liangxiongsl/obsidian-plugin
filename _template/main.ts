@@ -5,15 +5,17 @@ import {
 	Plugin,
 	PluginSettingTab,
 	Setting,
-	Menu,
+	Menu, addIcon, Vault, Platform, FileView,
 } from 'obsidian';
 import {WorkspaceLeaf,ItemView} from 'obsidian'
-import {createApp} from 'vue'
-import sfc from './modules/sfc.vue'
-import http, {req} from "apis/anki-req";
-import {propsToAttrMap} from "@vue/shared";
-import {mode_action} from 'apis/els'
-
+import {mode_action,action} from 'apis/els'
+import {git,repos} from 'apis/github-req'
+import {isString} from "@vue/shared";
+import {isNumericLiteral} from "tsutils";
+import {normalize} from 'path'
+import {exec} from 'child_process'
+import {render} from "vue";
+import {context} from "esbuild";
 
 // Remember to rename these classes and interfaces!
 
@@ -25,12 +27,113 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 	example_setting: 'default'
 }
 
-
 export default class MyPlugin extends Plugin {
-
 	async onload() {
 		console.log('onload')
 
+		this.registerEvent(this.app.workspace.on('editor-menu',(menu, editor, info)=>{
+			// console.log(menu,editor,info)
+			console.log(info)
+			if (editor.somethingSelected()){
+				menu.addItem((item)=>{
+					item.setTitle('alert selection').onClick((d)=>{
+						console.log(editor.getSelection())
+					})
+				})
+			}
+
+		}))
+		this.registerEvent(this.app.workspace.on('editor-paste', async (e,editor,info)=>{
+			let cur=() =>{
+				const now = new Date()
+
+				const year = now.getFullYear()
+				const month = String(now.getMonth() + 1).padStart(2, '0') // getMonth() 返回值为 0-11，因此需要加 1
+				const day = String(now.getDate()).padStart(2, '0')
+
+				const hours = String(now.getHours()).padStart(2, '0')
+				const minutes = String(now.getMinutes()).padStart(2, '0')
+				const seconds = String(now.getSeconds()).padStart(2, '0')
+
+				return {
+					file: `${year}${month}${day}${hours}${minutes}${seconds}`,
+					commit: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+				}
+			}
+			// mime-suffix => dir
+			let map = {
+				'image': 'images',
+				'application/pdf': 'pdfs'
+			}
+			let files = e.clipboardData?.files || []
+			// 仅上传第一个文件
+			for (let i = 0; i < files?.length && i<1; i++) {
+				let file = files[i]
+				console.log(`uploading ${file.name}`)
+				for (let [k,v] of Object.entries(map)){
+					if (file?.type.startsWith(k)){
+						let now = cur()
+						let suf = file?.name.split('.')[file?.name.split('.').length-1]
+						let upload = async (str: string)=>{
+							let res = await repos.createOrUpdateFileContents({...this.git_conf,
+								repo: 'obsidian-public',
+								path: `${v}/${now.file}.${suf}`,
+								content: str,
+								message: `upload file: ${now.commit}`
+							})
+							console.log(res)
+							return res.data.content.download_url
+						}
+						let delete_local_file = async ()=>{
+							let name = `Pasted image ${now.file}.${suf}`
+							let f = this.app.metadataCache.getFirstLinkpathDest(name, '')
+							if (f){
+								let assets_path = await this.app.fileManager.getAvailablePathForAttachment('')
+								assets_path = assets_path.substring(0,assets_path.length-2)
+								if (f.parent?.path === assets_path){
+									// console.log(f.stat)
+									await this.app.vault.delete(f)
+								}
+							}
+						}
+						let replace = (pre: string, now: string)=>{
+							editor.setValue(editor.getValue().replace(pre,now))
+						}
+
+						let reader = new FileReader()
+						let cursor = editor.getCursor()
+						reader.onload = async function (){
+							//@ts-ignore
+							let str = reader?.result?.split(',')[1]
+
+							editor.transaction({
+								changes: [{text: `![${now.file}.${suf}#waiting...](https://raw.githubusercontent.com/liangxiongsl/obsidian-public/main/loading.png)`, from: cursor}]
+							})
+							let url = await upload(str)
+
+							let cursor_after = editor.getCursor()
+							editor.undo()
+							editor.transaction({
+								changes: [{text: `![${now.file}.${suf}|300](${url})`, from: cursor}]
+							})
+							// 恢复文件上传完成前一刻的光标位置
+							editor.setCursor(cursor_after)
+							// 将文件 url 复制到粘贴板中，防止下次重复上传文件
+							await navigator.clipboard.writeText(`![${now.file}.${suf}|300](${url})`)
+
+							await delete_local_file()
+						}
+						reader.readAsDataURL(file)
+					}
+				}
+				// 阻止默认的粘贴行为（如：obsidian 粘贴 [[wiki-path.png]] ）
+				e.preventDefault()
+			}
+		}))
+
+
+		//@ts-ignore
+		this.app.viewRegistry.typeByExtension['pdf'] = ''
 
 		this.settingTab = new MyPluginSettingTab(this.app, this)
 		await this.load_settings()
@@ -40,36 +143,43 @@ export default class MyPlugin extends Plugin {
 		this.init_modal()
 
 		let rb = this.addRibbonIcon('', 'example ribbon icon', (e)=> {
-			new Notice('example ribbon icon')
+			// new Notice('example action')
 		})
 		mode_action(rb.createEl('div'))
 		let sb = this.addStatusBarItem()
 		mode_action(sb.createEl('div'))
+		// action(sb.createEl('div'))
+
 		let add_action = ()=>{
 			let els = document.getElementsByClassName('view-actions')
 			for (let i = 0; i < els.length; i++) {
 				let el = els[i]
-				// if (!el.getElementsByClassName('mode_action').length){
-				// 	let action_el = document.createElement('div')
-				// 	mode_action(action_el)
-				// 	el.insertAdjacentElement('afterbegin', action_el)
-				// }
 				let setting_el = el.querySelector('[aria-label="更多选项"]')
 				if (setting_el && !el.getElementsByClassName('mode_action').length){
-					let action_el = document.createElement('div') as HTMLElement
-					mode_action(action_el)
-					setting_el.insertAdjacentElement('beforebegin', action_el)
+					setting_el.insertAdjacentElement('beforebegin', mode_action(document.createElement('div')))
+					// setting_el.insertAdjacentElement('beforebegin', action(document.createElement('div')))
 				}
 			}
 		}
 		this.registerEvent(this.app.workspace.on('file-open',()=>add_action()))
+
 		add_action()
 
-		new MyNotice((el)=>el.setText('example'))
+		// this.addCommand({id: 'ed', name: 'change bg', callback: ()=>{Util.bg()}, hotkeys: [{modifiers: ['Ctrl', 'Shift', 'Alt'], key: 'b'}]})
+
+		// new MyNotice((el)=>el.setText('example'))
 
 		this.registerView('my-view-type', (leaf)=>new MyItemView(leaf, this))
-		// let leaf = this.app.workspace.getRightLeaf(false)
-		// leaf?.setViewState({type: 'my-view-type', state: {hello: 'world'}}).then(()=>leaf)
+
+		this.addRibbonIcon('github', 'open obsidian-public',async ()=>{
+			let l = this.app.workspace.getLeaf(true)
+			await l.setViewState({type: 'my-view-type', state: {hello: 'world'}})
+			// this.app.workspace.revealLeaf(l)
+		})
+		// let l = this.app.workspace.getLeaf(true)
+		// await l.setViewState({type: 'my-view-type', state: {}})
+		// this.app.workspace.revealLeaf(l)
+
 		this.register(()=>{
 			console.log('unload')
 			// console.log(this.app.workspace.getLeavesOfType('my-view-type'))
@@ -82,24 +192,6 @@ export default class MyPlugin extends Plugin {
 			// await l.setViewState({type: 'my-view-type'})
 			// this.app.workspace.setActiveLeaf(l)
 		}
-
-
-		// this.app.workspace.getLeavesOfType('my-view-id').forEach((v)=>v.detach())
-
-		// await leaf.setViewState({type: 'my-view-id', active: true})
-		// this.app.workspace.revealLeaf(leaf)
-		// console.log(this.app.workspace.getLeafById('my-view-id'))
-
-
-		// let leaf1 = this.app.workspace.createLeafBySplit(leaf, 'horizontal', true)
-		// await leaf1.setViewState({type: 'my-view-id', active: true})
-		// this.app.workspace.revealLeaf(leaf1)
-
-		// this.app.workspace.iterateRootLeaves((leaf)=>leaf.setGroup('test'))
-		// this.app.workspace.iterateAllLeaves((leaf)=>{
-		// 	console.log(leaf.getViewState().type)
-		// 	leaf.getViewState()
-		// })
 
 		this.addCommand({
 			id: '',
@@ -159,6 +251,12 @@ export default class MyPlugin extends Plugin {
 
 	onunload() {
 
+	}
+
+	git_conf = {
+		owner: 'liangxiongsl',
+		author: {name: 'liangxiongsl', email: '1506218507@qq.com'},
+		committer: {name: 'liangxiongsl', email: '1506218507@qq.com'}
 	}
 
 
@@ -243,37 +341,109 @@ class MyNotice extends Notice{
 	}
 }
 
+interface Content{
+	download_url: string,
+	git_url: string,
+	html_url: string,
+	name: string,
+	path: string,
+	sha: string,
+	size: number,
+	type: string,
+	url: string,
+	_links: {git: string, html: string, self: string},
+	childs?: Content[]
+}
+
 class MyItemView extends ItemView{
-	ob: Plugin
-	constructor(leaf: WorkspaceLeaf, ob: Plugin) {
+	ob: MyPlugin
+	constructor(leaf: WorkspaceLeaf, ob: MyPlugin) {
 		super(leaf);
 		this.ob = ob
 	}
-	getDisplayText(): string {
-		return "my-view-display";
+	getDisplayText(): string { return "my-view-display"; }
+	getViewType(): string {	return "my-view-type"; }
+
+
+	async get_repo(repo: string){
+		let get = async (path: string)=>{
+			let ret: Content[] = []
+			let res: Content[] = (await git.repos.getContent({...this.ob.git_conf, repo, path: path})).data
+			res.forEach(async(v)=>{
+				if (v.type === 'dir'){
+					ret.push({...v, childs: await get(v.path)})
+				}
+			})
+			res.forEach(async(v)=>{
+				if (v.type === 'file'){
+					ret.push(v)
+				}
+			})
+			return ret
+		}
+		let ret = await get('')
+		// console.log(ret)
+		return ret
 	}
-	getViewType(): string {
-		return "my-view-type";
+
+	async get_repo_el(file_or_dirs: Content[], repo: string){
+		let get_el = async (file_or_dirs: Content[])=>{
+			let el = createEl('div', {cls: 'tree-item-children nav-folder-children'})
+			el.hide()
+			el.createEl('div', {attr: {style: 'width: 176px; height: 0.1px; margin-bottom: 0px;'}})
+
+			file_or_dirs.forEach(async(v)=>{
+				if (v.type === 'dir'){
+					let dir = el.createEl('div', {cls: 'tree-item nav-folder'})
+					let title = dir.createEl('span', {cls: 'tree-item-self is-clickable nav-folder-title'})
+					// title.createEl('div').innerHTML = '<div class="tree-item-icon collapse-icon nav-folder-collapse-indicator"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon right-triangle"><path d="M3 8L12 17L21 8"></path></svg></div>'
+					title.createEl('span', {cls: 'tree-item-inner nav-folder-title-content', text: v.name, attr: {'data-path': v.path}})
+					if (v.childs){
+						let sub = await get_el(v.childs)
+						title.onclick = ()=>sub.isShown() ? sub.hide() : sub.show()
+						dir.appendChild(sub)
+					}
+				}
+			})
+			file_or_dirs.forEach(async(v)=>{
+				if (v.type === 'file'){
+					let file = el.createEl('div', {cls: 'tree-item nav-file'})
+					file.createEl('div', {cls: 'tree-item-self is-clickable nav-file-title'})
+						.createEl('div', {cls: 'tree-item-inner nav-file-title-content', text: v.name, attr: {'data-path': v.path}})
+					file.createEl('div', {cls: 'tree-item-children'})
+				}
+			})
+			return el
+		}
+		let root = createEl('div', {cls: 'nav-files-container node-insert-event show-unsupported'})
+			.createEl('div', {cls: 'tree-item nav-folder mod-root'})
+		let title = root.createEl('div', {cls: 'tree-item-self nav-folder-title'})
+			.createEl('div', {cls: 'tree-item-inner nav-folder-title-content'})
+		title.createEl('span', {text: repo})
+		title.createEl('span', {}, (el)=>{
+			el.innerHTML = '&#x1f9fe;'
+			// el.onclick = ()=>
+		})
+		let sub = root.appendChild(await get_el(file_or_dirs))
+		title.onclick = ()=>sub.isShown() ? sub.hide() : sub.show()
+		return root
 	}
+
+	// repos_key = ['obsidian-public']
+	// repos_el: { [repo: string]: HTMLElement } = {}
+
 	async onOpen(){
-		// this.addAction('dice', 'jiba', ()=>0)
-		createApp(sfc, {ob: this.ob}).mount(this.contentEl)
-
-
-		// createApp(sfc, {ob: this.ob}).mount(h.children[2])
-
-		// let tb = document.createElement('table')
-		// for (let i = 0; i < 5; i++) {
-		// 	let tr = document.createElement('tr')
-		// 	for (let j = 0; j < 5; j++) {
-		// 		let td = document.createElement('td')
-		// 		td.setText(`${i}-${j}`)
-		// 		tr.appendChild(td)
-		// 	}
-		// 	tb.appendChild(tr)
-		// }
-		// tb.setAttr('border', '1')
-		// this.contentEl.append(tb)
+		this.icon = 'book-up'
+		let data = await this.ob.loadData() ?? {}
+		if (data['obsidian-public']){
+			this.contentEl.appendChild(await this.get_repo_el(data['obsidian-public'], 'obsidian-public'))
+		}else {
+			let file_or_dirs = await this.get_repo('obsidian-public')
+			// console.log(file_or_dirs)
+			await this.ob.saveData({'obsidian-public': file_or_dirs})
+			let el = await this.get_repo_el(file_or_dirs, 'obsidian-public')
+			this.contentEl.appendChild(el)
+		}
 	}
 }
 

@@ -1,0 +1,11 @@
+{
+  "apps": [
+    {
+      "name": "pdf",
+      "code": "C:\\Users\\lx150\\AppData\\Local\\Kingsoft\\WPS Office\\ksolaunch.exe",
+      "arguments": "",
+      "showInMenu": true
+    }
+  ],
+  "sysexpInFileMenu": false
+}
