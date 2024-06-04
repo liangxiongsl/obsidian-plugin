@@ -1,16 +1,20 @@
 {
   "recentFiles": [
     {
+      "basename": "未命名",
+      "path": "未命名.md"
+    },
+    {
       "basename": "obsidian.prac",
       "path": "docs/锐化思维/tools/obsidian.prac.md"
     },
     {
-      "basename": "javascript",
-      "path": "docs/草稿/前端/core/javascript.md"
-    },
-    {
       "basename": "obsidian.api",
       "path": "docs/锐化思维/tools/obsidian.api.md"
+    },
+    {
+      "basename": "javascript",
+      "path": "docs/草稿/前端/core/javascript.md"
     },
     {
       "basename": "octokit.js",

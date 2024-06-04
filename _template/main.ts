@@ -16,6 +16,7 @@ import {normalize} from 'path'
 import {exec} from 'child_process'
 import {render} from "vue";
 import {context} from "esbuild";
+import {sub} from "./editor";
 
 // Remember to rename these classes and interfaces!
 
@@ -31,35 +32,38 @@ export default class MyPlugin extends Plugin {
 	async onload() {
 		console.log('onload')
 
-		this.registerEvent(this.app.workspace.on('editor-menu',(menu, editor, info)=>{
-			// console.log(menu,editor,info)
-			console.log(info)
-			if (editor.somethingSelected()){
-				menu.addItem((item)=>{
-					item.setTitle('alert selection').onClick((d)=>{
-						console.log(editor.getSelection())
-					})
-				})
-			}
+		// this.registerEvent(this.app.workspace.on('editor-menu',(menu, editor, info)=>{
+		// 	// console.log(menu,editor,info)
+		// 	console.log(info, editor.getSelection())
+		//
+		// 	if (editor.somethingSelected()){
+		// 		menu.addItem((item)=>{
+		// 			item.setTitle('alert selection').onClick((d)=>{
+		// 				console.log(editor.getSelection())
+		// 			})
+		// 		})
+		// 	}
+		// }))
 
-		}))
+		// 格式化当前时间
+		let cur=() =>{
+			const now = new Date()
+
+			const year = now.getFullYear()
+			const month = String(now.getMonth() + 1).padStart(2, '0') // getMonth() 返回值为 0-11，因此需要加 1
+			const day = String(now.getDate()).padStart(2, '0')
+
+			const hours = String(now.getHours()).padStart(2, '0')
+			const minutes = String(now.getMinutes()).padStart(2, '0')
+			const seconds = String(now.getSeconds()).padStart(2, '0')
+
+			return {
+				file: `${year}${month}${day}${hours}${minutes}${seconds}`,
+				commit: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+			}
+		}
+		// (2-1) 上传粘贴的文件
 		this.registerEvent(this.app.workspace.on('editor-paste', async (e,editor,info)=>{
-			let cur=() =>{
-				const now = new Date()
-
-				const year = now.getFullYear()
-				const month = String(now.getMonth() + 1).padStart(2, '0') // getMonth() 返回值为 0-11，因此需要加 1
-				const day = String(now.getDate()).padStart(2, '0')
-
-				const hours = String(now.getHours()).padStart(2, '0')
-				const minutes = String(now.getMinutes()).padStart(2, '0')
-				const seconds = String(now.getSeconds()).padStart(2, '0')
-
-				return {
-					file: `${year}${month}${day}${hours}${minutes}${seconds}`,
-					commit: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
-				}
-			}
 			// mime-suffix => dir
 			let map = {
 				'image': 'images',
@@ -82,7 +86,7 @@ export default class MyPlugin extends Plugin {
 								message: `upload file: ${now.commit}`
 							})
 							console.log(res)
-							return res.data.content.download_url
+							return res.data.content
 						}
 						let delete_local_file = async ()=>{
 							let name = `Pasted image ${now.file}.${suf}`
@@ -106,20 +110,22 @@ export default class MyPlugin extends Plugin {
 							//@ts-ignore
 							let str = reader?.result?.split(',')[1]
 
+							let loading_url = `![${now.file}.${suf}#waiting...](https://raw.githubusercontent.com/liangxiongsl/obsidian-public/main/loading.png)`
 							editor.transaction({
-								changes: [{text: `![${now.file}.${suf}#waiting...](https://raw.githubusercontent.com/liangxiongsl/obsidian-public/main/loading.png)`, from: cursor}]
+								changes: [{text: loading_url, from: cursor}]
 							})
-							let url = await upload(str)
+							let content = await upload(str)
+							let md_url = `![${now.file}.${suf}|300](${content.download_url}?sha=${content.sha})`
 
 							let cursor_after = editor.getCursor()
 							editor.undo()
 							editor.transaction({
-								changes: [{text: `![${now.file}.${suf}|300](${url})`, from: cursor}]
+								changes: [{text: md_url, from: cursor}]
 							})
 							// 恢复文件上传完成前一刻的光标位置
 							editor.setCursor(cursor_after)
 							// 将文件 url 复制到粘贴板中，防止下次重复上传文件
-							await navigator.clipboard.writeText(`![${now.file}.${suf}|300](${url})`)
+							await navigator.clipboard.writeText(md_url)
 
 							await delete_local_file()
 						}
@@ -130,7 +136,47 @@ export default class MyPlugin extends Plugin {
 				e.preventDefault()
 			}
 		}))
+		this.registerEvent(this.app.workspace.on('url-menu',(menu, url)=>{
+			// (2-2) url 上下文菜单中检索被引用的文件，及被引用的数量
+			menu.addItem( (item)=>{
+				item.setSection('file-url-manage').setTitle('query url dependencies')
+					.onClick(async (e)=>{
+						let notice = ''
+						let files = this.app.vault.getMarkdownFiles()
+						for (let i = 0; i < files.length; i++) {
+							let v = files[i]
+							let content = await this.app.vault.read(v)
+							let regex_url = url.replace('/','\\/').replace('.','\\.').replace('?','\\?')
+							let matches = content.match(new RegExp(`\\!\\[[^\\[\\]]*\\]\\(${regex_url}\\)`, 'g'))
+							if (matches){
+									notice += `${v===this.app.workspace.getActiveFile() ? '$ ' : ''}${v.path} => ${matches.length}\n`
+							}
+						}
+						new Notice(notice)
+					})
+			})
 
+			// (2-3) url 上下文菜单中删除文件
+			// https://raw.githubusercontent.com/liangxiongsl/obsidian-public/main/images/20240604191255.png?sha=ba3da17313769f27c50388207631fc4716a861f5
+			let {origin, pathname, searchParams} = new URL(url)
+			if (origin==='https://raw.githubusercontent.com' && pathname.startsWith('/liangxiongsl/obsidian-public/main/images')){
+				menu.addItem((item)=>{
+					item.setSection('file-url-manage').setTitle('delete remote image/file').onClick(async (e)=>{
+						let res = await repos.deleteFile({...this.git_conf,
+							repo: 'obsidian-public',
+							// 将 '/user/repo/branch/' 替换为 ''
+							path: pathname.replace(/^\/[^\/]*\/[^\/]*\/[^\/]*\//, ''),
+							message: `delete image: ${cur().commit}`,
+							sha: searchParams.get('sha')
+						})
+
+						console.log(res)
+						console.log(`deleted image ${url}`)
+						new Notice(`deleted image ${url}`)
+					})
+				})
+			}
+		}))
 
 		//@ts-ignore
 		this.app.viewRegistry.typeByExtension['pdf'] = ''
