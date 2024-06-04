@@ -1,16 +1,13 @@
 import {
 	App,
-	Modal,
 	Notice,
 	Plugin,
 	PluginSettingTab,
 	Setting,
-	Menu, addIcon, Vault, Platform, FileView,
 } from 'obsidian';
 import {WorkspaceLeaf,ItemView} from 'obsidian'
 import {mode_action,action} from 'apis/els'
 import {git,repos} from 'apis/github-req'
-import {isString} from "@vue/shared";
 import {isNumericLiteral} from "tsutils";
 import {normalize} from 'path'
 import {exec} from 'child_process'
@@ -18,33 +15,51 @@ import {render} from "vue";
 import {context} from "esbuild";
 import {sub} from "./editor";
 
-// Remember to rename these classes and interfaces!
+// module_settings
+type Module = 'default'
+type MySetting = Record<Module, Record<string, any>>
 
-interface MyPluginSettings {
-	example_setting: string;
-}
-
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	example_setting: 'default'
+class MyPluginSettingTab extends PluginSettingTab {
+	plugin: MyPlugin
+	constructor(app: App, plugin: MyPlugin) {
+		super(app, plugin)
+		this.plugin = plugin
+	}
+	async display() {
+		// console.log('display')
+		await this.plugin.render_settings()
+	}
 }
 
 export default class MyPlugin extends Plugin {
 	async onload() {
 		console.log('onload')
 
-		// this.registerEvent(this.app.workspace.on('editor-menu',(menu, editor, info)=>{
-		// 	// console.log(menu,editor,info)
-		// 	console.log(info, editor.getSelection())
-		//
-		// 	if (editor.somethingSelected()){
-		// 		menu.addItem((item)=>{
-		// 			item.setTitle('alert selection').onClick((d)=>{
-		// 				console.log(editor.getSelection())
-		// 			})
-		// 		})
-		// 	}
-		// }))
+		this.module_remote_file_manager()
 
+		// module_pdf_opender
+		//@ts-ignore
+		this.app.viewRegistry.typeByExtension['pdf'] = ''
+
+		await this.module_settings()
+
+		this.module_general_actions()
+
+		this.module_query_remote_repo()
+
+		this.module_editor_render()
+	}
+
+	onunload() {
+
+	}
+
+	git_conf = {
+		owner: 'liangxiongsl',
+		author: {name: 'liangxiongsl', email: '1506218507@qq.com'},
+		committer: {name: 'liangxiongsl', email: '1506218507@qq.com'}
+	}
+	module_remote_file_manager(){
 		// 格式化当前时间
 		let cur=() =>{
 			const now = new Date()
@@ -137,6 +152,7 @@ export default class MyPlugin extends Plugin {
 			}
 		}))
 		this.registerEvent(this.app.workspace.on('url-menu',(menu, url)=>{
+			// menu.setUseNativeMenu(false)
 			// (2-2) url 上下文菜单中检索被引用的文件，及被引用的数量
 			menu.addItem( (item)=>{
 				item.setSection('file-url-manage').setTitle('query url dependencies')
@@ -149,7 +165,7 @@ export default class MyPlugin extends Plugin {
 							let regex_url = url.replace('/','\\/').replace('.','\\.').replace('?','\\?')
 							let matches = content.match(new RegExp(`\\!\\[[^\\[\\]]*\\]\\(${regex_url}\\)`, 'g'))
 							if (matches){
-									notice += `${v===this.app.workspace.getActiveFile() ? '$ ' : ''}${v.path} => ${matches.length}\n`
+								notice += `${v===this.app.workspace.getActiveFile() ? '$ ' : ''}${v.path} => ${matches.length}\n`
 							}
 						}
 						new Notice(notice)
@@ -177,25 +193,61 @@ export default class MyPlugin extends Plugin {
 				})
 			}
 		}))
+	}
 
-		//@ts-ignore
-		this.app.viewRegistry.typeByExtension['pdf'] = ''
 
+	// @设置
+	settingTab: MyPluginSettingTab
+	settings: MySetting = {
+		default: {
+			example: "example setting",
+		}
+	}
+
+	async module_settings(){
+		await this.read_settings()
+		await this.save_settings()
 		this.settingTab = new MyPluginSettingTab(this.app, this)
-		await this.load_settings()
+		this.addSettingTab(this.settingTab)
+		console.log(this.settings)
+	}
+	async read_settings(){
+		let local_settings = await this.loadData()
+		this.settings.default = Object.assign({}, this.settings.default, local_settings.default)
+		return this.settings
+	}
+	async save_settings(){
+		await this.saveData(this.settings)
+		return this.settings
+	}
+	async render_settings(){
+		await this.read_settings()
+		this.settingTab.containerEl.empty()
+		new Setting(this.settingTab.containerEl)
+			.setName('example setting')
+			.setDesc('example description')
+			.addText((text) => {
+				text.setPlaceholder('example placeholder')
+					.setValue(this.settings.default.example)
+					.onChange(async (val)=>{
+						this.settings.default.example = val
+						await this.save_settings()
+					})
+			})
+	}
 
-		this.init_menu()
-
-		this.init_modal()
-
-		let rb = this.addRibbonIcon('', 'example ribbon icon', (e)=> {
-			// new Notice('example action')
-		})
+	module_general_actions(){
+		// 左侧栏 => 暗/亮 模式切换
+		let rb = this.addRibbonIcon('', 'example ribbon icon', (e)=> {})
 		mode_action(rb.createEl('div'))
+
+		// 状态栏 => 暗/亮 模式切换
 		let sb = this.addStatusBarItem()
 		mode_action(sb.createEl('div'))
-		// action(sb.createEl('div'))
+		// 状态栏 => 背景图片切换
+		action(sb.createEl('div'))
 
+		// editor actions => 暗/亮 模式切换
 		let add_action = ()=>{
 			let els = document.getElementsByClassName('view-actions')
 			for (let i = 0; i < els.length; i++) {
@@ -208,13 +260,10 @@ export default class MyPlugin extends Plugin {
 			}
 		}
 		this.registerEvent(this.app.workspace.on('file-open',()=>add_action()))
-
 		add_action()
+	}
 
-		// this.addCommand({id: 'ed', name: 'change bg', callback: ()=>{Util.bg()}, hotkeys: [{modifiers: ['Ctrl', 'Shift', 'Alt'], key: 'b'}]})
-
-		// new MyNotice((el)=>el.setText('example'))
-
+	module_query_remote_repo(){
 		this.registerView('my-view-type', (leaf)=>new MyItemView(leaf, this))
 
 		this.addRibbonIcon('github', 'open obsidian-public',async ()=>{
@@ -232,22 +281,9 @@ export default class MyPlugin extends Plugin {
 			this.app.workspace.getLeavesOfType('my-view-type').forEach(v=>v.detach())
 			// this.app.workspace.detachLeavesOfType('my-views-type')
 		})
-		let f = this.app.vault.getFileByPath('word.md')
-		if (f){
-			// let l = this.app.workspace.getLeaf('tab')
-			// await l.setViewState({type: 'my-view-type'})
-			// this.app.workspace.setActiveLeaf(l)
-		}
+	}
 
-		this.addCommand({
-			id: '',
-			name: '',
-			editorCallback: (editor, ctx)=>{
-				editor.replaceRange(editor.getSelection().toUpperCase(), editor.getCursor('from'), editor.getCursor('to'))
-				editor.replaceRange(`[`, editor.getCursor('from'))
-				editor.replaceRange(`]`, editor.getCursor('to'))
-			}
-		})
+	module_editor_render(){
 
 		const ALL_EMOJIS: Record<string, string> = {
 			"+1": "👍",
@@ -294,98 +330,8 @@ export default class MyPlugin extends Plugin {
 			table.setAttr('style', 'width: 95%')
 		})
 	}
-
-	onunload() {
-
-	}
-
-	git_conf = {
-		owner: 'liangxiongsl',
-		author: {name: 'liangxiongsl', email: '1506218507@qq.com'},
-		committer: {name: 'liangxiongsl', email: '1506218507@qq.com'}
-	}
-
-
-	// @设置
-	settings: MyPluginSettings;
-	settingTab: MyPluginSettingTab;
-	async load_settings(){
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData())
-
-		this.settingTab.containerEl.empty()
-		this.addSettingTab(this.settingTab)
-
-		new Setting(this.settingTab.containerEl)
-			.setName('example setting')
-			.setDesc('example description')
-			.addText((text) => {
-				text.setPlaceholder('example placeholder')
-					.setValue(this.settings.example_setting)
-					.onChange(async (val)=>{
-						this.settings.example_setting = val
-						await this.saveData(this.settings)
-					})
-			})
-	}
-
-	// @ribbon-上下文菜单
-	ribbon_menu: Menu;
-	init_menu(){
-		this.ribbon_menu = new Menu()
-		this.ribbon_menu.addItem((item)=>{
-			item.setTitle('example menu item')
-				.onClick(()=>new Notice('example menu item'))
-		})
-
-		// this.addRibbonIcon('dice', 'example ribbon icon', (e)=>{
-		// 	this.ribbon_menu.showAtMouseEvent(e)
-		// })
-
-	}
-
-	// @模态
-	modal: MyModal;
-	init_modal(){
-		this.modal = new MyModal(this.app)
-		this.modal
-			.setTitle('example modal')
-			.setContent('example modal content')
-
-		// this.addRibbonIcon('dice', 'example ribbon icon', (e)=>{
-		// 	this.modal.open()
-		// })
-	}
 }
 
-class MyPluginSettingTab extends PluginSettingTab {
-	plugin: MyPlugin
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin)
-		this.plugin = plugin
-	}
-	async display() {
-		await this.plugin.load_settings()
-	}
-}
-class MyModal extends Modal {
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
-	}
-}
-
-
-class MyNotice extends Notice{
-	constructor(cb: (el: HTMLElement)=>void, duration?: number) {
-		super('', duration)
-		cb(this.noticeEl)
-	}
-}
 
 interface Content{
 	download_url: string,

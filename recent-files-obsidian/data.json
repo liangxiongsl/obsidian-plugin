@@ -1,16 +1,20 @@
 {
   "recentFiles": [
     {
-      "basename": "未命名",
-      "path": "未命名.md"
-    },
-    {
       "basename": "obsidian.prac",
       "path": "docs/锐化思维/tools/obsidian.prac.md"
     },
     {
       "basename": "obsidian.api",
       "path": "docs/锐化思维/tools/obsidian.api.md"
+    },
+    {
+      "basename": "github",
+      "path": "docs/草稿/DevOps/github.md"
+    },
+    {
+      "basename": "未命名",
+      "path": "未命名.md"
     },
     {
       "basename": "javascript",
@@ -147,10 +151,6 @@
     {
       "basename": "redis",
       "path": "docs/草稿/数据库/redis.md"
-    },
-    {
-      "basename": "github",
-      "path": "docs/草稿/DevOps/github.md"
     },
     {
       "basename": "element",
