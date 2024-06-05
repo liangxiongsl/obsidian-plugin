@@ -1,22 +1,10 @@
-import {
-	App,
-	Notice,
-	Plugin,
-	PluginSettingTab,
-	Setting,
-} from 'obsidian';
+import {App, Notice, Plugin, PluginSettingTab, Setting,} from 'obsidian';
 import {WorkspaceLeaf,ItemView} from 'obsidian'
 import {mode_action,action} from 'apis/els'
-import {git,repos} from 'apis/github-req'
-import {isNumericLiteral} from "tsutils";
-import {normalize} from 'path'
-import {exec} from 'child_process'
-import {render} from "vue";
-import {context} from "esbuild";
-import {sub} from "./editor";
+import {git, repos, git_conf, rest, get_tree_rec, get_tree_items, Node} from 'apis/github-req'
 
 // module_settings
-type Module = 'default'
+type Module = 'default' | 'git'
 type MySetting = Record<Module, Record<string, any>>
 
 class MyPluginSettingTab extends PluginSettingTab {
@@ -34,6 +22,9 @@ class MyPluginSettingTab extends PluginSettingTab {
 export default class MyPlugin extends Plugin {
 	async onload() {
 		console.log('onload')
+
+		// console.log((await repos.listForAuthenticatedUser({})).data)
+
 
 		this.module_remote_file_manager()
 
@@ -54,11 +45,6 @@ export default class MyPlugin extends Plugin {
 
 	}
 
-	git_conf = {
-		owner: 'liangxiongsl',
-		author: {name: 'liangxiongsl', email: '1506218507@qq.com'},
-		committer: {name: 'liangxiongsl', email: '1506218507@qq.com'}
-	}
 	module_remote_file_manager(){
 		// 格式化当前时间
 		let cur=() =>{
@@ -94,7 +80,7 @@ export default class MyPlugin extends Plugin {
 						let now = cur()
 						let suf = file?.name.split('.')[file?.name.split('.').length-1]
 						let upload = async (str: string)=>{
-							let res = await repos.createOrUpdateFileContents({...this.git_conf,
+							let res = await repos.createOrUpdateFileContents({...git_conf,
 								repo: 'obsidian-public',
 								path: `${v}/${now.file}.${suf}`,
 								content: str,
@@ -153,6 +139,7 @@ export default class MyPlugin extends Plugin {
 		}))
 		this.registerEvent(this.app.workspace.on('url-menu',(menu, url)=>{
 			// menu.setUseNativeMenu(false)
+
 			// (2-2) url 上下文菜单中检索被引用的文件，及被引用的数量
 			menu.addItem( (item)=>{
 				item.setSection('file-url-manage').setTitle('query url dependencies')
@@ -178,50 +165,65 @@ export default class MyPlugin extends Plugin {
 			if (origin==='https://raw.githubusercontent.com' && pathname.startsWith('/liangxiongsl/obsidian-public/main/images')){
 				menu.addItem((item)=>{
 					item.setSection('file-url-manage').setTitle('delete remote image/file').onClick(async (e)=>{
-						let res = await repos.deleteFile({...this.git_conf,
+						repos.deleteFile({...git_conf,
 							repo: 'obsidian-public',
 							// 将 '/user/repo/branch/' 替换为 ''
 							path: pathname.replace(/^\/[^\/]*\/[^\/]*\/[^\/]*\//, ''),
 							message: `delete image: ${cur().commit}`,
 							sha: searchParams.get('sha')
+						}).then((res: any)=>{
+							if (!res) return
+							console.log(res)
+							console.log(`deleted image ${url}`)
+							new Notice(`successfully deleted image ${url}`)
 						})
-
-						console.log(res)
-						console.log(`deleted image ${url}`)
-						new Notice(`deleted image ${url}`)
 					})
 				})
 			}
 		}))
 	}
 
-
 	// @设置
 	settingTab: MyPluginSettingTab
 	settings: MySetting = {
 		default: {
 			example: "example setting",
+		},
+		git: {
+
 		}
 	}
-
 	async module_settings(){
 		await this.read_settings()
 		await this.save_settings()
 		this.settingTab = new MyPluginSettingTab(this.app, this)
 		this.addSettingTab(this.settingTab)
-		console.log(this.settings)
+		// console.log(this.settings)
 	}
 	async read_settings(){
-		let local_settings = await this.loadData()
-		this.settings.default = Object.assign({}, this.settings.default, local_settings.default)
+		let local_settings = await this.loadData() || {}
+		Object.keys(this.settings).forEach((v: Module)=>{
+			this.settings[v] = Object.assign({}, this.settings[v], local_settings[v])
+		})
+		console.log(this.settings)
 		return this.settings
 	}
 	async save_settings(){
 		await this.saveData(this.settings)
 		return this.settings
 	}
+	async read_setting(module: Module){
+		let local_settings = await this.loadData()
+		return this.settings[module] = Object.assign({}, this.settings[module], local_settings[module])
+	}
+	async save_setting(module: Module){
+		let local_settings = await this.loadData()
+		local_settings[module] = Object.assign({}, local_settings[module], this.settings[module])
+		await this.saveData(local_settings)
+		return this.settings[module]
+	}
 	async render_settings(){
-		await this.read_settings()
+		await this.read_setting('default')
 		this.settingTab.containerEl.empty()
 		new Setting(this.settingTab.containerEl)
 			.setName('example setting')
@@ -231,7 +233,8 @@ export default class MyPlugin extends Plugin {
 					.setValue(this.settings.default.example)
 					.onChange(async (val)=>{
 						this.settings.default.example = val
-						await this.save_settings()
+						this.settings.git = {}
+						await this.save_setting('default')
 					})
 			})
 	}
@@ -332,21 +335,6 @@ export default class MyPlugin extends Plugin {
 	}
 }
 
-
-interface Content{
-	download_url: string,
-	git_url: string,
-	html_url: string,
-	name: string,
-	path: string,
-	sha: string,
-	size: number,
-	type: string,
-	url: string,
-	_links: {git: string, html: string, self: string},
-	childs?: Content[]
-}
-
 class MyItemView extends ItemView{
 	ob: MyPlugin
 	constructor(leaf: WorkspaceLeaf, ob: MyPlugin) {
@@ -356,57 +344,53 @@ class MyItemView extends ItemView{
 	getDisplayText(): string { return "my-view-display"; }
 	getViewType(): string {	return "my-view-type"; }
 
-
-	async get_repo(repo: string){
-		let get = async (path: string)=>{
-			let ret: Content[] = []
-			let res: Content[] = (await git.repos.getContent({...this.ob.git_conf, repo, path: path})).data
-			res.forEach(async(v)=>{
-				if (v.type === 'dir'){
-					ret.push({...v, childs: await get(v.path)})
-				}
-			})
-			res.forEach(async(v)=>{
-				if (v.type === 'file'){
-					ret.push(v)
-				}
-			})
-			return ret
+	async get_tree_el(repo: string){
+		let nodes = (await this.ob.read_setting('git'))[repo]
+		if (!Array.isArray(nodes) || !(nodes as Node[]).push){
+			try {
+				nodes = (await get_tree_rec(repo, 'heads/main')).childs
+				this.ob.settings.git[repo] = nodes
+			}catch (e){
+				// this.ob.settings.git[repo] = []
+				return createEl('div')
+			}
+			await this.ob.save_setting('git')
 		}
-		let ret = await get('')
-		// console.log(ret)
-		return ret
-	}
+		console.log(nodes)
 
-	async get_repo_el(file_or_dirs: Content[], repo: string){
-		let get_el = async (file_or_dirs: Content[])=>{
+		let get_el = async (nodes: Node[])=>{
 			let el = createEl('div', {cls: 'tree-item-children nav-folder-children'})
 			el.hide()
 			el.createEl('div', {attr: {style: 'width: 176px; height: 0.1px; margin-bottom: 0px;'}})
 
-			file_or_dirs.forEach(async(v)=>{
-				if (v.type === 'dir'){
-					let dir = el.createEl('div', {cls: 'tree-item nav-folder'})
+			for (let i = 0; i < nodes.length; i++) {
+				let v = nodes[i]
+				let arr = v.data.path.split('/'), label = arr[arr.length-1]
+				if (v.data.type === 'tree'){
+					let dir = el.createEl('span', {cls: 'tree-item nav-folder'})
 					let title = dir.createEl('span', {cls: 'tree-item-self is-clickable nav-folder-title'})
-					// title.createEl('div').innerHTML = '<div class="tree-item-icon collapse-icon nav-folder-collapse-indicator"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon right-triangle"><path d="M3 8L12 17L21 8"></path></svg></div>'
-					title.createEl('span', {cls: 'tree-item-inner nav-folder-title-content', text: v.name, attr: {'data-path': v.path}})
-					if (v.childs){
+					// title.createEl('span').innerHTML = '<div class="tree-item-icon collapse-icon nav-folder-collapse-indicator"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon right-triangle"><path d="M3 8L12 17L21 8"></path></svg></div>'
+					title.createEl('span', {cls: 'tree-item-inner nav-folder-title-content', text: label, attr: {'data-path': v.data.path}})
+					if (v.childs.length > 0){
 						let sub = await get_el(v.childs)
 						title.onclick = ()=>sub.isShown() ? sub.hide() : sub.show()
 						dir.appendChild(sub)
 					}
 				}
-			})
-			file_or_dirs.forEach(async(v)=>{
-				if (v.type === 'file'){
+			}
+			for (let i = 0; i < nodes.length; i++) {
+				let v = nodes[i]
+				let arr = v.data.path.split('/'), label = arr[arr.length-1]
+				if (v.data.type !== 'tree'){
 					let file = el.createEl('div', {cls: 'tree-item nav-file'})
 					file.createEl('div', {cls: 'tree-item-self is-clickable nav-file-title'})
-						.createEl('div', {cls: 'tree-item-inner nav-file-title-content', text: v.name, attr: {'data-path': v.path}})
+						.createEl('div', {cls: 'tree-item-inner nav-file-title-content', text: label, attr: {'data-path': v.data.path}})
 					file.createEl('div', {cls: 'tree-item-children'})
 				}
-			})
+			}
 			return el
 		}
+
 		let root = createEl('div', {cls: 'nav-files-container node-insert-event show-unsupported'})
 			.createEl('div', {cls: 'tree-item nav-folder mod-root'})
 		let title = root.createEl('div', {cls: 'tree-item-self nav-folder-title'})
@@ -416,26 +400,30 @@ class MyItemView extends ItemView{
 			el.innerHTML = '&#x1f9fe;'
 			// el.onclick = ()=>
 		})
-		let sub = root.appendChild(await get_el(file_or_dirs))
+		let sub = root.appendChild(await get_el(nodes))
 		title.onclick = ()=>sub.isShown() ? sub.hide() : sub.show()
 		return root
 	}
 
-	// repos_key = ['obsidian-public']
-	// repos_el: { [repo: string]: HTMLElement } = {}
-
 	async onOpen(){
 		this.icon = 'book-up'
-		let data = await this.ob.loadData() ?? {}
-		if (data['obsidian-public']){
-			this.contentEl.appendChild(await this.get_repo_el(data['obsidian-public'], 'obsidian-public'))
-		}else {
-			let file_or_dirs = await this.get_repo('obsidian-public')
-			// console.log(file_or_dirs)
-			await this.ob.saveData({'obsidian-public': file_or_dirs})
-			let el = await this.get_repo_el(file_or_dirs, 'obsidian-public')
-			this.contentEl.appendChild(el)
+		this.app.workspace.revealLeaf(this.leaf)
+
+		let select = createEl('select')
+		this.contentEl.appendChild(select)
+		select.onchange = async ()=>{
+			let opt = select.options[select.options.selectedIndex]
+			// this.contentEl.appendChild(await this.get_tree_el(opt.value))
 		}
+		let rps = (await repos.listForUser({username: 'liangxiongsl'})).data
+
+		for (let i = 0; i < rps.length; i++) {
+			let v = rps[i]
+			select.appendChild(createEl('option', {value: v.name, text: v.name}))
+			console.log(v.name)
+			this.contentEl.appendChild(await this.get_tree_el(v.name))
+		}
+		// this.contentEl.appendChild(repo_el)
 	}
 }
 
