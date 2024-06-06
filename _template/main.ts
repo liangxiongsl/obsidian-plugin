@@ -4,7 +4,7 @@ import {mode_action,action} from 'apis/els'
 import {git, repos, git_conf, rest, get_tree_rec, get_tree_items, Node} from 'apis/github-req'
 
 // module_settings
-type Module = 'default' | 'git'
+type Module = 'default' | 'git' | 'file_manager'
 type MySetting = Record<Module, Record<string, any>>
 
 class MyPluginSettingTab extends PluginSettingTab {
@@ -23,16 +23,18 @@ export default class MyPlugin extends Plugin {
 	async onload() {
 		console.log('onload')
 
-		// console.log((await repos.listForAuthenticatedUser({})).data)
+		// let { app: { internalPlugins: { plugins: {workspaces}, plugins } } } = window
+		// console.log(plugins)
+		// this.app.emulateMobile(false)
 
-
-		this.module_remote_file_manager()
 
 		// module_pdf_opender
 		//@ts-ignore
 		this.app.viewRegistry.typeByExtension['pdf'] = ''
 
 		await this.module_settings()
+
+		this.module_remote_file_manager()
 
 		this.module_general_actions()
 
@@ -42,8 +44,69 @@ export default class MyPlugin extends Plugin {
 	}
 
 	onunload() {
-
+		console.log('unload')
 	}
+
+	// @设置
+	settingTab: MyPluginSettingTab
+	settings: MySetting = {
+		default: {
+			example: "example setting",
+		},
+		git: {
+
+		},
+		file_manager: {
+			user: 'liangxiongsl',
+			repo: 'obsidian-public'
+		}
+	}
+	async module_settings(){
+		await this.read_settings()
+		await this.save_settings()
+		this.settingTab = new MyPluginSettingTab(this.app, this)
+		this.addSettingTab(this.settingTab)
+		// console.log(this.settings)
+	}
+	async read_settings(){
+		let local_settings = await this.loadData() || {}
+		Object.keys(this.settings).forEach((v: Module)=>{
+			this.settings[v] = Object.assign({}, this.settings[v], local_settings[v])
+		})
+		console.log(this.settings)
+		return this.settings
+	}
+	async save_settings(){
+		await this.saveData(this.settings)
+		return this.settings
+	}
+	async read_setting(module: Module){
+		let local_settings = await this.loadData()
+		return this.settings[module] = Object.assign({}, this.settings[module], local_settings[module])
+	}
+	async save_setting(module: Module){
+		let local_settings = await this.loadData()
+		local_settings[module] = Object.assign({}, local_settings[module], this.settings[module])
+		await this.saveData(local_settings)
+		return this.settings[module]
+	}
+	async render_settings(){
+		await this.read_setting('default')
+		this.settingTab.containerEl.empty()
+		new Setting(this.settingTab.containerEl)
+			.setName('example setting')
+			.setDesc('example description')
+			.addText((text) => {
+				text.setPlaceholder('example placeholder')
+					.setValue(this.settings.default.example)
+					.onChange(async (val)=>{
+						this.settings.default.example = val
+						this.settings.git = {}
+						await this.save_setting('default')
+					})
+			})
+	}
+
 
 	// 格式化当前时间
 	cur(){
@@ -100,7 +163,8 @@ export default class MyPlugin extends Plugin {
 		return new RegExp(str.replace(/\//g, '\\/').replace(/\./g, '\\.').replace(/\?/g, '\\?'))
 	}
 	module_remote_file_manager(){
-		let REPO = 'obsidian-public'
+		let { user: USER, repo: REPO } = this.settings.file_manager
+		console.log(USER, REPO)
 
 		// (2-1) 上传粘贴的文件
 		this.registerEvent(this.app.workspace.on('editor-paste', async (e,editor,info)=>{
@@ -122,7 +186,7 @@ export default class MyPlugin extends Plugin {
 						await this.delete_linktext_file(file.name)
 
 						let cursor = editor.getCursor()
-						let loading_url = `![${now.file}.${suf}#waiting...](https://raw.githubusercontent.com/liangxiongsl/${REPO}/main/loading.png#${file.name})`
+						let loading_url = `![${now.file}.${suf}#waiting...](https://raw.githubusercontent.com/${USER}/${REPO}/main/loading.png#${file.name})`
 						editor.transaction({
 							changes: [{text: loading_url, from: cursor}]
 						})
@@ -187,110 +251,54 @@ export default class MyPlugin extends Plugin {
 
 			// (2-3) url 上下文菜单中删除文件
 			// https://raw.githubusercontent.com/liangxiongsl/obsidian-public/main/images/20240604191255.png?sha=ba3da17313769f27c50388207631fc4716a861f5
-			let {origin, pathname, searchParams} = new URL(url)
-			if (origin==='https://raw.githubusercontent.com' && pathname.startsWith(`/liangxiongsl/${REPO}/main/`)){
-				menu.addItem((item)=>{
-					item.setSection('file-url-manage').setTitle('delete remote image/file').onClick(async (e)=>{
-						repos.deleteFile({...git_conf,
-							repo: REPO,
-							// 将 '/user/repo/branch/' 替换为 ''
-							path: pathname.replace(new RegExp(`\\/liangxiongsl\\/${REPO}\\/main\\/`), ''),
-							message: `delete image: ${this.cur().commit}`,
-							sha: searchParams.get('sha')
-						}).then((res: any)=>{
-							if (!res) return
-							console.log(res)
-							console.log(`deleted image ${url}`)
-							new Notice(`successfully deleted image ${url}`)
+			let regex = new RegExp(`https:\\/\\/raw\\.githubusercontent\\.com\\/([^\\/]*)\\/([^\/]*)\\/main\\/([^?]*)\\?sha=(\\w{40,40})`, 'g')
+			if (url.match(regex)){
+				let [user, repo, path, sha] = url.replace(regex, '$1#$2#$3$4').split('#')
+				console.log(user, repo, path, sha)
+				if (user === USER && repo === REPO){
+					menu.addItem((item)=> {
+						item.setSection('file-url-manage').setTitle('delete remote image/file').onClick(async (e) => {
+							repos.deleteFile({...git_conf, repo, path, sha,
+								message: `delete image: ${this.cur().commit}`
+							}).then((res: any) => {
+								if (!res) return
+								console.log(res)
+								console.log(`deleted image ${url}`)
+								new Notice(`successfully deleted image ${url}`)
+							})
 						})
 					})
-				})
+				}
 			}
 		}))
 
 		// (2-4) 删除指定范围文本中的远程附件
 		this.registerEvent(this.app.workspace.on('editor-menu', (menu, editor, info)=>{
-			menu.addItem(item => item.setTitle('reload').onClick(e => location.reload()))
 			if (editor.somethingSelected()){
 				menu.addItem((item)=>
 					item.setSection('file-url-manage')
-						.setTitle(`delete selected files(liangxiongsl/${REPO})`)
+						.setTitle(`delete selected files(${USER}/${REPO})`)
 						.onClick((e)=>{
 							let str = editor.getSelection()
-							let regex = new RegExp(`https:\\/\\/raw\\.githubusercontent\\.com\\/liangxiongsl\\/${REPO}\\/main\\/([^?]*)\\?sha=(\\w{40,40})`, 'g')
+							let regex = new RegExp(`https:\\/\\/raw\\.githubusercontent\\.com\\/${USER}\\/${REPO}\\/main\\/([^?]*)\\?sha=(\\w{40,40})`, 'g')
 							let m = str.match(regex)
 							if (m){
 								m.forEach((v)=>{
 									let [path, sha] = v.replace(regex, '$1#$2').split('#')
-									repos.deleteFile({...git_conf, repo: REPO, path, sha, message: `delete image: ${this.cur().commit}`})
-										.then((res: any)=>{
-											if (!res) return
-											console.log(res)
-											console.log(`deleted image ${v}`)
-											new Notice(`successfully deleted image ${v}`)
-										})
+									repos.deleteFile({...git_conf, repo: REPO, path, sha,
+										message: `delete file: ${this.cur().commit}`
+									}).then((res: any)=>{
+										if (!res) return
+										console.log(res)
+										console.log(`deleted file ${path}`)
+										new Notice(`successfully deleted file ${path}`)
+									})
 								})
 							}
 						})
 				)
 			}
 		}))
-	}
-
-	// @设置
-	settingTab: MyPluginSettingTab
-	settings: MySetting = {
-		default: {
-			example: "example setting",
-		},
-		git: {
-
-		}
-	}
-	async module_settings(){
-		await this.read_settings()
-		await this.save_settings()
-		this.settingTab = new MyPluginSettingTab(this.app, this)
-		this.addSettingTab(this.settingTab)
-		// console.log(this.settings)
-	}
-	async read_settings(){
-		let local_settings = await this.loadData() || {}
-		Object.keys(this.settings).forEach((v: Module)=>{
-			this.settings[v] = Object.assign({}, this.settings[v], local_settings[v])
-		})
-		console.log(this.settings)
-		return this.settings
-	}
-	async save_settings(){
-		await this.saveData(this.settings)
-		return this.settings
-	}
-	async read_setting(module: Module){
-		let local_settings = await this.loadData()
-		return this.settings[module] = Object.assign({}, this.settings[module], local_settings[module])
-	}
-	async save_setting(module: Module){
-		let local_settings = await this.loadData()
-		local_settings[module] = Object.assign({}, local_settings[module], this.settings[module])
-		await this.saveData(local_settings)
-		return this.settings[module]
-	}
-	async render_settings(){
-		await this.read_setting('default')
-		this.settingTab.containerEl.empty()
-		new Setting(this.settingTab.containerEl)
-			.setName('example setting')
-			.setDesc('example description')
-			.addText((text) => {
-				text.setPlaceholder('example placeholder')
-					.setValue(this.settings.default.example)
-					.onChange(async (val)=>{
-						this.settings.default.example = val
-						this.settings.git = {}
-						await this.save_setting('default')
-					})
-			})
 	}
 
 	module_general_actions(){
@@ -318,14 +326,26 @@ export default class MyPlugin extends Plugin {
 		}
 		this.registerEvent(this.app.workspace.on('file-open',()=>add_action()))
 		add_action()
+
+		// 重新加载 obsidian
+		this.registerEvent(this.app.workspace.on('editor-menu', (menu, editor, info)=>{
+			menu.addItem(item => item.setTitle('reload').onClick(e => location.reload()))
+		}))
+
+		// 切换平台
+		//@ts-ignore
+		this.addRibbonIcon(!this.app.isMobile ? 'toggle-left' : 'toggle-right', 'switch platform', (e)=>this.app.emulateMobile(!this.app.isMobile))
 	}
 
 	module_query_remote_repo(){
 		this.registerView('my-view-type', (leaf)=>new MyItemView(leaf, this))
 
+		this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf)=>{
+			console.log(leaf?.getViewState())
+		}))
 		this.addRibbonIcon('github', 'open obsidian-public',async ()=>{
 			let l = this.app.workspace.getLeaf(true)
-			await l.setViewState({type: 'my-view-type', state: {hello: 'world'}})
+			await l.setViewState({type: 'my-view-type', state: {a: 'b'}})
 			// this.app.workspace.revealLeaf(l)
 		})
 		// let l = this.app.workspace.getLeaf(true)
@@ -333,7 +353,6 @@ export default class MyPlugin extends Plugin {
 		// this.app.workspace.revealLeaf(l)
 
 		this.register(()=>{
-			console.log('unload')
 			// console.log(this.app.workspace.getLeavesOfType('my-view-type'))
 			this.app.workspace.getLeavesOfType('my-view-type').forEach(v=>v.detach())
 			// this.app.workspace.detachLeavesOfType('my-views-type')
@@ -462,7 +481,7 @@ class MyItemView extends ItemView{
 	async onOpen(){
 		this.icon = 'book-up'
 		this.app.workspace.revealLeaf(this.leaf)
-
+		return
 		let select = createEl('select')
 		this.contentEl.appendChild(select)
 		select.onchange = async ()=>{
