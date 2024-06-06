@@ -1,20 +1,52 @@
 {
   "recentFiles": [
     {
-      "basename": "obsidian.api",
-      "path": "docs/锐化思维/tools/obsidian.api.md"
+      "basename": "未命名",
+      "path": "未命名.md"
+    },
+    {
+      "basename": "模式匹配",
+      "path": "docs/锐化思维/模式匹配.md"
+    },
+    {
+      "basename": "obsidian--anki",
+      "path": "docs/锐化思维/plugin-connector/obsidian--anki.md"
+    },
+    {
+      "basename": "fuck math",
+      "path": "docs-hard/anki/fuck math.md"
+    },
+    {
+      "basename": "regex",
+      "path": "regex.md"
+    },
+    {
+      "basename": "back",
+      "path": "docs-hard/back.md"
+    },
+    {
+      "basename": "obsidian.prac",
+      "path": "docs/锐化思维/tools/obsidian.prac.md"
+    },
+    {
+      "basename": "github",
+      "path": "docs/草稿/DevOps/github.md"
+    },
+    {
+      "basename": "anki",
+      "path": "docs/锐化思维/tools/anki.md"
+    },
+    {
+      "basename": "keys",
+      "path": "docs-hwo/pwd/keys.md"
     },
     {
       "basename": "octokit.js",
       "path": "docs/草稿/DevOps/octokit.js.md"
     },
     {
-      "basename": "未命名",
-      "path": "未命名.md"
-    },
-    {
-      "basename": "github",
-      "path": "docs/草稿/DevOps/github.md"
+      "basename": "obsidian.api",
+      "path": "docs/锐化思维/tools/obsidian.api.md"
     },
     {
       "basename": "github.api",
@@ -31,10 +63,6 @@
     {
       "basename": "memory",
       "path": "docs-me/school/memory.md"
-    },
-    {
-      "basename": "obsidian.prac",
-      "path": "docs/锐化思维/tools/obsidian.prac.md"
     },
     {
       "basename": "javascript",
@@ -171,34 +199,6 @@
     {
       "basename": "js-web-api",
       "path": "docs/草稿/前端/core/js-web-api.md"
-    },
-    {
-      "basename": "api-keys",
-      "path": "docs-hwo/pwd/api-keys.md"
-    },
-    {
-      "basename": "模式匹配",
-      "path": "docs/锐化思维/模式匹配.md"
-    },
-    {
-      "basename": "fastapi",
-      "path": "docs/草稿/后端/python/fastapi.md"
-    },
-    {
-      "basename": "搞",
-      "path": "待办项目/毕业论文/搞.md"
-    },
-    {
-      "basename": "git",
-      "path": "docs/草稿/DevOps/git.md"
-    },
-    {
-      "basename": "obsidian--anki",
-      "path": "docs/锐化思维/plugin-connector/obsidian--anki.md"
-    },
-    {
-      "basename": "hehe",
-      "path": "docs-me/intrest/hehe.md"
     }
   ],
   "omittedPaths": [],

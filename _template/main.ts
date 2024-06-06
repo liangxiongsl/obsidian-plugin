@@ -45,97 +45,123 @@ export default class MyPlugin extends Plugin {
 
 	}
 
-	module_remote_file_manager(){
-		// 格式化当前时间
-		let cur=() =>{
-			const now = new Date()
+	// 格式化当前时间
+	cur(){
+		const now = new Date()
 
-			const year = now.getFullYear()
-			const month = String(now.getMonth() + 1).padStart(2, '0') // getMonth() 返回值为 0-11，因此需要加 1
-			const day = String(now.getDate()).padStart(2, '0')
+		const year = now.getFullYear()
+		const month = String(now.getMonth() + 1).padStart(2, '0') // getMonth() 返回值为 0-11，因此需要加 1
+		const day = String(now.getDate()).padStart(2, '0')
 
-			const hours = String(now.getHours()).padStart(2, '0')
-			const minutes = String(now.getMinutes()).padStart(2, '0')
-			const seconds = String(now.getSeconds()).padStart(2, '0')
+		const hours = String(now.getHours()).padStart(2, '0')
+		const minutes = String(now.getMinutes()).padStart(2, '0')
+		const seconds = String(now.getSeconds()).padStart(2, '0')
 
-			return {
-				file: `${year}${month}${day}${hours}${minutes}${seconds}`,
-				commit: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+		return {
+			file: `${year}${month}${day}${hours}${minutes}${seconds}`,
+			commit: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+		}
+	}
+	async upload_base64(repo: string, path: string, suf: string, base64_str: string, now = {file: '', commit: ''}){
+		if (!now.file.length && !now.commit.length){
+			now = this.cur()
+		}
+		let res = await repos.createOrUpdateFileContents({...git_conf,
+			repo: repo,
+			path: `${path}/${now.file}.${suf}`,
+			content: base64_str,
+			message: `upload file: ${now.commit}`
+		})
+		console.log(res)
+		return res.data.content
+	}
+	async file_to_base64(file: File, cb: (base64_str: string)=>any){
+		let reader = new FileReader()
+		reader.onload = ()=>{
+			//@ts-ignore
+			let str = reader?.result?.split(',')[1]
+			cb(str)
+		}
+		reader.readAsDataURL(file)
+	}
+	async delete_linktext_file (linktext: string){
+		let assets_path = await this.app.fileManager.getAvailablePathForAttachment('')
+		assets_path = assets_path.substring(0,assets_path.length-2)
+		let f = this.app.metadataCache.getFirstLinkpathDest(linktext, assets_path)
+		console.log(linktext,f?.path)
+		if (f){
+			if (f.parent?.path === assets_path){
+				// console.log(f.stat)
+				await this.app.vault.delete(f)
 			}
 		}
+	}
+	to_regex(str: string){
+		return new RegExp(str.replace(/\//g, '\\/').replace(/\./g, '\\.').replace(/\?/g, '\\?'))
+	}
+	module_remote_file_manager(){
+		let REPO = 'obsidian-public'
+
 		// (2-1) 上传粘贴的文件
 		this.registerEvent(this.app.workspace.on('editor-paste', async (e,editor,info)=>{
-			// mime-suffix => dir
-			let map = {
-				'image': 'images',
-				'application/pdf': 'pdfs'
-			}
-			let files = e.clipboardData?.files || []
+			let file = e.clipboardData?.files[0]
 			// 仅上传第一个文件
-			for (let i = 0; i < files?.length && i<1; i++) {
-				let file = files[i]
+			if (file){
 				console.log(`uploading ${file.name}`)
-				for (let [k,v] of Object.entries(map)){
-					if (file?.type.startsWith(k)){
-						let now = cur()
-						let suf = file?.name.split('.')[file?.name.split('.').length-1]
-						let upload = async (str: string)=>{
-							let res = await repos.createOrUpdateFileContents({...git_conf,
-								repo: 'obsidian-public',
-								path: `${v}/${now.file}.${suf}`,
-								content: str,
-								message: `upload file: ${now.commit}`
-							})
-							console.log(res)
-							return res.data.content
-						}
-						let delete_local_file = async ()=>{
-							let name = `Pasted image ${now.file}.${suf}`
-							let f = this.app.metadataCache.getFirstLinkpathDest(name, '')
-							if (f){
-								let assets_path = await this.app.fileManager.getAvailablePathForAttachment('')
-								assets_path = assets_path.substring(0,assets_path.length-2)
-								if (f.parent?.path === assets_path){
-									// console.log(f.stat)
-									await this.app.vault.delete(f)
-								}
-							}
-						}
-						let replace = (pre: string, now: string)=>{
-							editor.setValue(editor.getValue().replace(pre,now))
-						}
+				let upload = async (mime_prefix: string, paste_template: string, path = '')=>{
+					if (!path.length){
+						path = mime_prefix
+					}
+					if (file?.type.startsWith(mime_prefix)){
+						let now = this.cur()
+						let spl = file.name.split('.'), suf = spl[spl.length-1]
 
-						let reader = new FileReader()
+						// 阻止默认行为
+						e.preventDefault()
+						await this.delete_linktext_file(`Pasted image ${now.file}.${suf}`)
+						await this.delete_linktext_file(file.name)
+
 						let cursor = editor.getCursor()
-						reader.onload = async function (){
-							//@ts-ignore
-							let str = reader?.result?.split(',')[1]
-
-							let loading_url = `![${now.file}.${suf}#waiting...](https://raw.githubusercontent.com/liangxiongsl/obsidian-public/main/loading.png)`
-							editor.transaction({
-								changes: [{text: loading_url, from: cursor}]
-							})
-							let content = await upload(str)
-							let md_url = `![${now.file}.${suf}|300](${content.download_url}?sha=${content.sha})`
+						let loading_url = `![${now.file}.${suf}#waiting...](https://raw.githubusercontent.com/liangxiongsl/${REPO}/main/loading.png#${file.name})`
+						editor.transaction({
+							changes: [{text: loading_url, from: cursor}]
+						})
+						await this.file_to_base64(file, async (base64_str)=>{
+							let content = await this.upload_base64(REPO, path, suf, base64_str)
+							let paste_str = paste_template
+								.replace(/{{now}}/g, now.file)
+								.replace(/{{suf}}/g, suf)
+								.replace(/{{url}}/g, `${content.download_url}?sha=${content.sha}`)
+							// console.log(paste_template, paste_str)
 
 							let cursor_after = editor.getCursor()
 							editor.undo()
 							editor.transaction({
-								changes: [{text: md_url, from: cursor}]
+								changes: [{text: paste_str, from: cursor}]
 							})
 							// 恢复文件上传完成前一刻的光标位置
 							editor.setCursor(cursor_after)
 							// 将文件 url 复制到粘贴板中，防止下次重复上传文件
-							await navigator.clipboard.writeText(md_url)
-
-							await delete_local_file()
-						}
-						reader.readAsDataURL(file)
+							await navigator.clipboard.writeText(paste_str)
+						})
+						return true
 					}
+					return false
 				}
-				// 阻止默认的粘贴行为（如：obsidian 粘贴 [[wiki-path.png]] ）
-				e.preventDefault()
+				let ok = await upload('image', '![{{now}}.{{suf}}]({{url}})')
+					|| await upload('video', `<video controls width="300"><source src="{{url}}" type="video/mp4" /></video>`)
+					|| await upload('audio', '<audio controls="" controlslist="" src="{{url}}"></audio>')
 			}
+			let type = e.clipboardData?.types[0]
+			if (type?.startsWith('text/plain')){
+				e.clipboardData?.items[0].getAsString(str=> {
+					// console.log(str)
+				})
+			}
+			// console.log(e.clipboardData?.dropEffect)
+			// console.log(e.clipboardData?.files)
+			// console.log(e.clipboardData?.types)
+			// console.log(e.clipboardData?.items)
 		}))
 		this.registerEvent(this.app.workspace.on('url-menu',(menu, url)=>{
 			// menu.setUseNativeMenu(false)
@@ -162,14 +188,14 @@ export default class MyPlugin extends Plugin {
 			// (2-3) url 上下文菜单中删除文件
 			// https://raw.githubusercontent.com/liangxiongsl/obsidian-public/main/images/20240604191255.png?sha=ba3da17313769f27c50388207631fc4716a861f5
 			let {origin, pathname, searchParams} = new URL(url)
-			if (origin==='https://raw.githubusercontent.com' && pathname.startsWith('/liangxiongsl/obsidian-public/main/images')){
+			if (origin==='https://raw.githubusercontent.com' && pathname.startsWith(`/liangxiongsl/${REPO}/main/`)){
 				menu.addItem((item)=>{
 					item.setSection('file-url-manage').setTitle('delete remote image/file').onClick(async (e)=>{
 						repos.deleteFile({...git_conf,
-							repo: 'obsidian-public',
+							repo: REPO,
 							// 将 '/user/repo/branch/' 替换为 ''
-							path: pathname.replace(/^\/[^\/]*\/[^\/]*\/[^\/]*\//, ''),
-							message: `delete image: ${cur().commit}`,
+							path: pathname.replace(new RegExp(`\\/liangxiongsl\\/${REPO}\\/main\\/`), ''),
+							message: `delete image: ${this.cur().commit}`,
 							sha: searchParams.get('sha')
 						}).then((res: any)=>{
 							if (!res) return
@@ -179,6 +205,34 @@ export default class MyPlugin extends Plugin {
 						})
 					})
 				})
+			}
+		}))
+
+		// (2-4) 删除指定范围文本中的远程附件
+		this.registerEvent(this.app.workspace.on('editor-menu', (menu, editor, info)=>{
+			menu.addItem(item => item.setTitle('reload').onClick(e => location.reload()))
+			if (editor.somethingSelected()){
+				menu.addItem((item)=>
+					item.setSection('file-url-manage')
+						.setTitle(`delete selected files(liangxiongsl/${REPO})`)
+						.onClick((e)=>{
+							let str = editor.getSelection()
+							let regex = new RegExp(`https:\\/\\/raw\\.githubusercontent\\.com\\/liangxiongsl\\/${REPO}\\/main\\/([^?]*)\\?sha=(\\w{40,40})`, 'g')
+							let m = str.match(regex)
+							if (m){
+								m.forEach((v)=>{
+									let [path, sha] = v.replace(regex, '$1#$2').split('#')
+									repos.deleteFile({...git_conf, repo: REPO, path, sha, message: `delete image: ${this.cur().commit}`})
+										.then((res: any)=>{
+											if (!res) return
+											console.log(res)
+											console.log(`deleted image ${v}`)
+											new Notice(`successfully deleted image ${v}`)
+										})
+								})
+							}
+						})
+				)
 			}
 		}))
 	}
