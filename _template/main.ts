@@ -1,7 +1,23 @@
-import {App, Notice, Plugin, PluginSettingTab, Setting,} from 'obsidian';
+import {
+	App,
+	Notice,
+	Plugin,
+	PluginSettingTab,
+	Setting,
+	ButtonComponent,
+	ExtraButtonComponent,
+	ColorComponent,
+	DropdownComponent,
+	ProgressBarComponent,
+	SliderComponent,
+	ToggleComponent,
+	AbstractTextComponent,
+	HoverPopover, EditorSuggest, EditorPosition, TFile, EditorSuggestTriggerInfo, Editor, EditorSuggestContext
+} from 'obsidian';
 import {WorkspaceLeaf,ItemView} from 'obsidian'
 import {mode_action,action} from 'apis/els'
 import {git, repos, git_conf, rest, get_tree_rec, get_tree_items, Node} from 'apis/github-req'
+import './my.css'
 
 // module_settings
 type Module = 'default' | 'git' | 'file_manager'
@@ -19,13 +35,10 @@ class MyPluginSettingTab extends PluginSettingTab {
 	}
 }
 
+
 export default class MyPlugin extends Plugin {
 	async onload() {
 		console.log('onload')
-
-		// let { app: { internalPlugins: { plugins: {workspaces}, plugins } } } = window
-		// console.log(plugins)
-		// this.app.emulateMobile(false)
 
 
 		// module_pdf_opender
@@ -41,6 +54,8 @@ export default class MyPlugin extends Plugin {
 		this.module_query_remote_repo()
 
 		this.module_editor_render()
+
+		this.module_code_complement()
 	}
 
 	onunload() {
@@ -73,7 +88,7 @@ export default class MyPlugin extends Plugin {
 		Object.keys(this.settings).forEach((v: Module)=>{
 			this.settings[v] = Object.assign({}, this.settings[v], local_settings[v])
 		})
-		console.log(this.settings)
+		// console.log(this.settings)
 		return this.settings
 	}
 	async save_settings(){
@@ -164,7 +179,7 @@ export default class MyPlugin extends Plugin {
 	}
 	module_remote_file_manager(){
 		let { user: USER, repo: REPO } = this.settings.file_manager
-		console.log(USER, REPO)
+		// console.log(USER, REPO)
 
 		// (2-1) 上传粘贴的文件
 		this.registerEvent(this.app.workspace.on('editor-paste', async (e,editor,info)=>{
@@ -340,16 +355,17 @@ export default class MyPlugin extends Plugin {
 	module_query_remote_repo(){
 		this.registerView('my-view-type', (leaf)=>new MyItemView(leaf, this))
 
-		this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf)=>{
-			console.log(leaf?.getViewState())
-		}))
+		// this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf)=>{
+		// 	// console.log(leaf?.getViewState())
+		// }))
+
 		this.addRibbonIcon('github', 'open obsidian-public',async ()=>{
 			let l = this.app.workspace.getLeaf(true)
 			await l.setViewState({type: 'my-view-type', state: {a: 'b'}})
 			// this.app.workspace.revealLeaf(l)
 		})
 		// let l = this.app.workspace.getLeaf(true)
-		// await l.setViewState({type: 'my-view-type', state: {}})
+		// l.setViewState({type: 'my-view-type', state: {}})
 		// this.app.workspace.revealLeaf(l)
 
 		this.register(()=>{
@@ -405,6 +421,11 @@ export default class MyPlugin extends Plugin {
 				})
 			table.setAttr('style', 'width: 95%')
 		})
+	}
+
+	module_code_complement(){
+		let suggest = new MyEditorSuggest(this.app)
+		// this.registerEditorSuggest(suggest)
 	}
 }
 
@@ -481,6 +502,29 @@ class MyItemView extends ItemView{
 	async onOpen(){
 		this.icon = 'book-up'
 		this.app.workspace.revealLeaf(this.leaf)
+
+		let el = new ButtonComponent(this.contentEl)
+			.setIcon('github').setTooltip('tooltip')
+		new ExtraButtonComponent(this.contentEl)
+			.setIcon('gihutb').setTooltip('tooltip')
+		new ColorComponent(this.contentEl)
+			.setValue('#00ff00')
+		new DropdownComponent(this.contentEl)
+			.addOptions({a: '123', b: '456', c: '789'})
+			.setValue('c')
+		new ProgressBarComponent(this.contentEl)
+			.setValue(20)
+		new SliderComponent(this.contentEl)
+			.setDynamicTooltip()
+			.setValue(23)
+		new ToggleComponent(this.contentEl)
+			.setValue(true)
+		new AbstractTextComponent(this.contentEl.createEl('textarea'))
+			.setValue('gejiba')
+			.setPlaceholder('jin')
+
+
+
 		return
 		let select = createEl('select')
 		this.contentEl.appendChild(select)
@@ -500,3 +544,66 @@ class MyItemView extends ItemView{
 	}
 }
 
+class MyEditorSuggest extends EditorSuggest<any>{
+	constructor(app: App) {
+		super(app);
+		this.setInstructions([
+			{command: 'ctrl+shit+gaobili', purpose: '搞比利'},
+		])
+	}
+
+	open() {
+		super.open();
+	}
+	close() {
+		super.close();
+	}
+
+	from: EditorPosition
+	to: EditorPosition
+	justClosed: boolean
+	onTrigger(cursor: EditorPosition, editor: Editor, file: TFile | null): EditorSuggestTriggerInfo | null {
+		if (this.justClosed || !cursor.ch) {
+			this.justClosed = false;
+			return null;
+		}
+
+		let prefix = editor.getLine(cursor.line).substring(0, cursor.ch)
+		let match = prefix.match(/@\w*$/)
+		// console.log('tri')
+		if (match){
+			this.from = { line: cursor.line, ch: match.index ?? 0}
+			this.to = { line: cursor.line, ch: cursor.ch }
+			return {
+				start: { line: cursor.line, ch: match.index ?? 0},
+				end: cursor,
+				query: match[0]
+			}
+		}
+		return null
+	}
+	getSuggestions(context: EditorSuggestContext): any[] | Promise<any[]> {
+		// console.log('sug')
+
+		let ret = []
+		for (let i = 0; i < context.query.length; i++) {
+			ret.unshift(context.query.substring(0, i+1))
+		}
+		return ret
+	}
+	renderSuggestion(value: any, el: HTMLElement) {
+		console.log('ren')
+		el.setText(value)
+	}
+	selectSuggestion(value: any, evt: MouseEvent | KeyboardEvent) {
+		let editor = this.app.workspace.activeEditor?.editor
+		if (editor){
+			// console.log(this.from, this.to)
+			console.log(value)
+			editor.replaceRange(value, this.from, this.to)
+		}
+
+		this.close()
+		this.justClosed = true
+	}
+}
