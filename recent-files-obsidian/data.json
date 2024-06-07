@@ -1,20 +1,40 @@
 {
   "recentFiles": [
     {
-      "basename": "obsidian.api",
-      "path": "docs/锐化思维/tools/obsidian.api.md"
+      "basename": "未命名",
+      "path": "未命名.md"
     },
     {
-      "basename": "readme",
-      "path": "readme.md"
+      "basename": "obsidian.api",
+      "path": "docs/锐化思维/tools/obsidian.api.md"
     },
     {
       "basename": "obsidian2",
       "path": "docs/锐化思维/tools/obsidian2.md"
     },
     {
-      "basename": "未命名",
-      "path": "未命名.md"
+      "basename": "vault-main",
+      "path": "vault-main.md"
+    },
+    {
+      "basename": "todo",
+      "path": "todo.md"
+    },
+    {
+      "basename": "regex",
+      "path": "regex.md"
+    },
+    {
+      "basename": "readme",
+      "path": "readme.md"
+    },
+    {
+      "basename": "tasks-index",
+      "path": "tasks-index.md"
+    },
+    {
+      "basename": "tasks-workspace",
+      "path": "tasks-workspace.md"
     },
     {
       "basename": "css",
@@ -33,10 +53,6 @@
       "path": "docs/锐化思维/tools/obsidian.prac.md"
     },
     {
-      "basename": "tasks-index",
-      "path": "tasks-index.md"
-    },
-    {
       "basename": "github",
       "path": "docs/草稿/DevOps/github.md"
     },
@@ -51,10 +67,6 @@
     {
       "basename": "obsidian--anki",
       "path": "docs/锐化思维/plugin-connector/obsidian--anki.md"
-    },
-    {
-      "basename": "regex",
-      "path": "regex.md"
     },
     {
       "basename": "back",
@@ -183,18 +195,6 @@
     {
       "basename": "http",
       "path": "docs/草稿/前端/core/http.md"
-    },
-    {
-      "basename": "word",
-      "path": "word.md"
-    },
-    {
-      "basename": "vault-main",
-      "path": "vault-main.md"
-    },
-    {
-      "basename": "redis",
-      "path": "docs/草稿/数据库/redis.md"
     }
   ],
   "omittedPaths": [],

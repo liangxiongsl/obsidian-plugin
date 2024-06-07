@@ -4,15 +4,13 @@ import {
 	Plugin,
 	PluginSettingTab,
 	Setting,
-	ButtonComponent,
-	ExtraButtonComponent,
-	ColorComponent,
-	DropdownComponent,
-	ProgressBarComponent,
-	SliderComponent,
-	ToggleComponent,
-	AbstractTextComponent,
-	HoverPopover, EditorSuggest, EditorPosition, TFile, EditorSuggestTriggerInfo, Editor, EditorSuggestContext
+	EditorSuggest,
+	EditorPosition,
+	TFile,
+	EditorSuggestTriggerInfo,
+	Editor,
+	EditorSuggestContext,
+	ButtonComponent
 } from 'obsidian';
 import {WorkspaceLeaf,ItemView} from 'obsidian'
 import {mode_action,action} from 'apis/els'
@@ -162,16 +160,18 @@ export default class MyPlugin extends Plugin {
 		}
 		reader.readAsDataURL(file)
 	}
-	async delete_linktext_file (linktext: string){
+	async delete_linktext_file (name: string, suf: string){
 		let assets_path = await this.app.fileManager.getAvailablePathForAttachment('')
-		assets_path = assets_path.substring(0,assets_path.length-2)
-		let f = this.app.metadataCache.getFirstLinkpathDest(linktext, assets_path)
-		console.log(linktext,f?.path)
+		assets_path = assets_path.substring(0, assets_path.length-2)
+		let path = await this.app.fileManager.getAvailablePathForAttachment(`${name}.${suf}`)
+		path = path.replace(`${assets_path}/`,'')
+
+		let num = parseInt(path.replace(`${name} `, '').replace(`.${suf}`, ''))
+		name = num>=2 ? `${name} ${num-1}` : name
+		let f = this.app.vault.getFileByPath(`${assets_path}/${name}.${suf}`)
+		console.log(f?.path)
 		if (f){
-			if (f.parent?.path === assets_path){
-				// console.log(f.stat)
-				await this.app.vault.delete(f)
-			}
+			await this.app.vault.delete(f)
 		}
 	}
 	to_regex(str: string){
@@ -197,8 +197,6 @@ export default class MyPlugin extends Plugin {
 
 						// 阻止默认行为
 						e.preventDefault()
-						await this.delete_linktext_file(`Pasted image ${now.file}.${suf}`)
-						await this.delete_linktext_file(file.name)
 
 						let cursor = editor.getCursor()
 						let loading_url = `![${now.file}.${suf}#waiting...](https://raw.githubusercontent.com/${USER}/${REPO}/main/loading.png#${file.name})`
@@ -222,7 +220,14 @@ export default class MyPlugin extends Plugin {
 							editor.setCursor(cursor_after)
 							// 将文件 url 复制到粘贴板中，防止下次重复上传文件
 							await navigator.clipboard.writeText(paste_str)
+
+							await this.delete_linktext_file(`Pasted image ${now.file}`, suf)
+							if (file){
+								await this.delete_linktext_file(file.name.substring(0,file.name.length-suf.length-1), suf)
+							}
 						})
+
+
 						return true
 					}
 					return false
@@ -374,6 +379,90 @@ export default class MyPlugin extends Plugin {
 			// this.app.workspace.detachLeavesOfType('my-views-type')
 		})
 	}
+	async get_tree_el(repo: string, reflash = false){
+		let USER = 'liangxiongsl'
+		let REPO = repo
+
+
+		let nodes = (await this.read_setting('git'))[repo]
+		if (!Array.isArray(nodes) || !(nodes as Node[]).push || reflash){
+			try {
+				nodes = (await get_tree_rec(repo, 'heads/main')).childs
+				this.settings.git[repo] = nodes
+			}catch (e){
+				// this.settings.git[repo] = []
+				return createEl('div')
+			}
+			await this.save_setting('git')
+		}
+		console.log(nodes)
+
+		let get_el = async (nodes: Node[])=>{
+			let el = createEl('div', {cls: 'tree-item-children nav-folder-children'})
+			el.hide()
+			el.createEl('div', {attr: {style: 'width: 176px; height: 0.1px; margin-bottom: 0px;'}})
+
+			for (let i = 0; i < nodes.length; i++) {
+				let v = nodes[i]
+				let arr = v.data.path.split('/'), label = arr[arr.length-1]
+				if (v.data.type === 'tree'){
+					let dir = el.createEl('span', {cls: 'tree-item nav-folder'})
+					let title = dir.createEl('span', {cls: 'tree-item-self is-clickable nav-folder-title'})
+					// title.createEl('span').innerHTML = '<div class="tree-item-icon collapse-icon nav-folder-collapse-indicator"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon right-triangle"><path d="M3 8L12 17L21 8"></path></svg></div>'
+					title.createEl('span', {cls: 'tree-item-inner nav-folder-title-content', text: label, attr: {'data-path': v.data.path}})
+					if (v.childs.length > 0){
+						let sub = await get_el(v.childs)
+						title.onclick = ()=>sub.isShown() ? sub.hide() : sub.show()
+						dir.appendChild(sub)
+					}
+				}
+			}
+			for (let i = 0; i < nodes.length; i++) {
+				let v = nodes[nodes.length-i-1]
+				let arr = v.data.path.split('/'), label = arr[arr.length-1]
+				if (v.data.type !== 'tree'){
+					let file = el.createEl('div', {cls: 'tree-item nav-file'})
+					file.createEl('div', {cls: 'tree-item-self is-clickable nav-file-title'})
+						.createEl('div', {cls: 'tree-item-inner nav-file-title-content', text: `${label}  (${v.data.size})`, attr: {'data-path': v.data.path}})
+						.onclick = ()=>{
+						let {path,sha} = v.data
+						let spl = path.split('.'), suf = spl[spl.length-1], name = path.replace(`.${suf}`,'')
+						let url = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${path}?sha=${sha}`
+						let paste = ''
+						if (path.startsWith('image') || ['png','gif'].contains(suf)){
+							paste = `![](${url})`
+						}else if (path.startsWith('video')){
+							paste = `<video controls width="300"><source src="${url}" type="video/mp4" /></video>`
+						}else if (path.startsWith('audio')){
+							paste = `<audio controls="" controlslist="" src="${url}"></audio>`
+						}else{
+							paste = url
+						}
+						navigator.clipboard.writeText(paste)
+						new Notice('copied')
+
+						console.log(paste)
+					}
+					file.createEl('div', {cls: 'tree-item-children'})
+				}
+			}
+			return el
+		}
+
+		let root = createEl('div', {cls: 'nav-files-container node-insert-event show-unsupported'})
+			.createEl('div', {cls: 'tree-item nav-folder mod-root'})
+		let title = root.createEl('div', {cls: 'tree-item-self nav-folder-title'})
+			.createEl('div', {cls: 'tree-item-inner nav-folder-title-content'})
+		title.createEl('span', {text: repo})
+		title.createEl('span', {}, (el)=>{
+			el.innerHTML = '&#x1f9fe;'
+			// el.onclick = ()=>
+		})
+		let sub = root.appendChild(await get_el(nodes))
+		title.onclick = ()=>sub.isShown() ? sub.hide() : sub.show()
+		sub.show()
+		return root
+	}
 
 	module_editor_render(){
 
@@ -438,109 +527,38 @@ class MyItemView extends ItemView{
 	getDisplayText(): string { return "my-view-display"; }
 	getViewType(): string {	return "my-view-type"; }
 
-	async get_tree_el(repo: string){
-		let nodes = (await this.ob.read_setting('git'))[repo]
-		if (!Array.isArray(nodes) || !(nodes as Node[]).push){
-			try {
-				nodes = (await get_tree_rec(repo, 'heads/main')).childs
-				this.ob.settings.git[repo] = nodes
-			}catch (e){
-				// this.ob.settings.git[repo] = []
-				return createEl('div')
-			}
-			await this.ob.save_setting('git')
-		}
-		console.log(nodes)
-
-		let get_el = async (nodes: Node[])=>{
-			let el = createEl('div', {cls: 'tree-item-children nav-folder-children'})
-			el.hide()
-			el.createEl('div', {attr: {style: 'width: 176px; height: 0.1px; margin-bottom: 0px;'}})
-
-			for (let i = 0; i < nodes.length; i++) {
-				let v = nodes[i]
-				let arr = v.data.path.split('/'), label = arr[arr.length-1]
-				if (v.data.type === 'tree'){
-					let dir = el.createEl('span', {cls: 'tree-item nav-folder'})
-					let title = dir.createEl('span', {cls: 'tree-item-self is-clickable nav-folder-title'})
-					// title.createEl('span').innerHTML = '<div class="tree-item-icon collapse-icon nav-folder-collapse-indicator"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon right-triangle"><path d="M3 8L12 17L21 8"></path></svg></div>'
-					title.createEl('span', {cls: 'tree-item-inner nav-folder-title-content', text: label, attr: {'data-path': v.data.path}})
-					if (v.childs.length > 0){
-						let sub = await get_el(v.childs)
-						title.onclick = ()=>sub.isShown() ? sub.hide() : sub.show()
-						dir.appendChild(sub)
-					}
-				}
-			}
-			for (let i = 0; i < nodes.length; i++) {
-				let v = nodes[i]
-				let arr = v.data.path.split('/'), label = arr[arr.length-1]
-				if (v.data.type !== 'tree'){
-					let file = el.createEl('div', {cls: 'tree-item nav-file'})
-					file.createEl('div', {cls: 'tree-item-self is-clickable nav-file-title'})
-						.createEl('div', {cls: 'tree-item-inner nav-file-title-content', text: label, attr: {'data-path': v.data.path}})
-					file.createEl('div', {cls: 'tree-item-children'})
-				}
-			}
-			return el
-		}
-
-		let root = createEl('div', {cls: 'nav-files-container node-insert-event show-unsupported'})
-			.createEl('div', {cls: 'tree-item nav-folder mod-root'})
-		let title = root.createEl('div', {cls: 'tree-item-self nav-folder-title'})
-			.createEl('div', {cls: 'tree-item-inner nav-folder-title-content'})
-		title.createEl('span', {text: repo})
-		title.createEl('span', {}, (el)=>{
-			el.innerHTML = '&#x1f9fe;'
-			// el.onclick = ()=>
-		})
-		let sub = root.appendChild(await get_el(nodes))
-		title.onclick = ()=>sub.isShown() ? sub.hide() : sub.show()
-		return root
-	}
 
 	async onOpen(){
 		this.icon = 'book-up'
 		this.app.workspace.revealLeaf(this.leaf)
-
-		let el = new ButtonComponent(this.contentEl)
-			.setIcon('github').setTooltip('tooltip')
-		new ExtraButtonComponent(this.contentEl)
-			.setIcon('gihutb').setTooltip('tooltip')
-		new ColorComponent(this.contentEl)
-			.setValue('#00ff00')
-		new DropdownComponent(this.contentEl)
-			.addOptions({a: '123', b: '456', c: '789'})
-			.setValue('c')
-		new ProgressBarComponent(this.contentEl)
-			.setValue(20)
-		new SliderComponent(this.contentEl)
-			.setDynamicTooltip()
-			.setValue(23)
-		new ToggleComponent(this.contentEl)
-			.setValue(true)
-		new AbstractTextComponent(this.contentEl.createEl('textarea'))
-			.setValue('gejiba')
-			.setPlaceholder('jin')
+		let btn = new ButtonComponent(this.contentEl.createEl('div'))
+			.setIcon('refresh-ccw')
+		btn.buttonEl.style.margin = '0 auto'
+		btn.buttonEl.style.display = 'block'
+		let boby = this.contentEl.createEl('div')
+		boby.appendChild(await this.ob.get_tree_el('obsidian-public', true))
+		btn.onClick(async (e)=>{
+			boby.remove()
+			boby = this.contentEl.createEl('div')
+			boby.appendChild(await this.ob.get_tree_el('obsidian-public', true))
+		})
 
 
+		// let select = createEl('select')
+		// this.contentEl.appendChild(select)
+		// select.onchange = async ()=>{
+		// 	let opt = select.options[select.options.selectedIndex]
+		// 	// this.contentEl.appendChild(await this.get_tree_el(opt.value))
+		// }
+		// let rps = (await repos.listForUser({username: 'liangxiongsl'})).data
+		//
+		// for (let i = 0; i < rps.length; i++) {
+		// 	let v = rps[i]
+		// 	select.appendChild(createEl('option', {value: v.name, text: v.name}))
+		// 	console.log(v.name)
+		// 	this.contentEl.appendChild(await this.ob.get_tree_el(v.name))
+		// }
 
-		return
-		let select = createEl('select')
-		this.contentEl.appendChild(select)
-		select.onchange = async ()=>{
-			let opt = select.options[select.options.selectedIndex]
-			// this.contentEl.appendChild(await this.get_tree_el(opt.value))
-		}
-		let rps = (await repos.listForUser({username: 'liangxiongsl'})).data
-
-		for (let i = 0; i < rps.length; i++) {
-			let v = rps[i]
-			select.appendChild(createEl('option', {value: v.name, text: v.name}))
-			console.log(v.name)
-			this.contentEl.appendChild(await this.get_tree_el(v.name))
-		}
-		// this.contentEl.appendChild(repo_el)
 	}
 }
 
