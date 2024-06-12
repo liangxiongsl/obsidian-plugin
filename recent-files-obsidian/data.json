@@ -1,16 +1,112 @@
 {
   "recentFiles": [
     {
+      "basename": "git",
+      "path": "docs/草稿/DevOps/git.md"
+    },
+    {
+      "basename": "readme",
+      "path": "docs-tmp/readme.md"
+    },
+    {
       "basename": "未命名",
       "path": "未命名.md"
+    },
+    {
+      "basename": "js-web-api",
+      "path": "docs/草稿/前端/core/js-web-api.md"
+    },
+    {
+      "basename": "javascript",
+      "path": "docs/草稿/前端/core/javascript.md"
+    },
+    {
+      "basename": "数据库-main",
+      "path": "docs/草稿/数据库/数据库-main.md"
+    },
+    {
+      "basename": "spring",
+      "path": "docs/草稿/后端/java/spring.md"
+    },
+    {
+      "basename": "github",
+      "path": "docs/草稿/DevOps/github.md"
+    },
+    {
+      "basename": "react",
+      "path": "docs/草稿/前端/CSR/react/react.md"
+    },
+    {
+      "basename": "mysql",
+      "path": "docs/草稿/数据库/mysql.md"
+    },
+    {
+      "basename": "ssm2",
+      "path": "docs/草稿/后端/java/ssm2.md"
+    },
+    {
+      "basename": "冥想",
+      "path": "冥想.md"
+    },
+    {
+      "basename": "tasks-index",
+      "path": "tasks-index.md"
+    },
+    {
+      "basename": "readme",
+      "path": "readme.md"
+    },
+    {
+      "basename": "ssm",
+      "path": "docs/草稿/后端/java/ssm.md"
+    },
+    {
+      "basename": "vue",
+      "path": "docs/草稿/前端/CSR/vue/vue.md"
+    },
+    {
+      "basename": "xml",
+      "path": "docs/草稿/general/xml.md"
+    },
+    {
+      "basename": "web-main",
+      "path": "docs/草稿/前端/core/web-main.md"
+    },
+    {
+      "basename": "xslt",
+      "path": "docs/草稿/general/xslt.md"
+    },
+    {
+      "basename": "Groovy",
+      "path": "docs/草稿/后端/java/Groovy.md"
+    },
+    {
+      "basename": "music",
+      "path": "music.md"
+    },
+    {
+      "basename": "java-main",
+      "path": "docs/草稿/后端/java/java-main.md"
+    },
+    {
+      "basename": "maven",
+      "path": "docs/草稿/后端/java/maven.md"
     },
     {
       "basename": "obsidian.api",
       "path": "docs/锐化思维/tools/obsidian.api.md"
     },
     {
+      "basename": "Drawing 2023-12-05 17.27.26.excalidraw",
+      "path": "assets-local/Excalidraw/Drawing 2023-12-05 17.27.26.excalidraw.md"
+    },
+    {
       "basename": "obsidian2",
       "path": "docs/锐化思维/tools/obsidian2.md"
+    },
+    {
+      "basename": "css",
+      "path": "docs/草稿/前端/core/css.md"
     },
     {
       "basename": "vault-main",
@@ -21,24 +117,8 @@
       "path": "todo.md"
     },
     {
-      "basename": "regex",
-      "path": "regex.md"
-    },
-    {
-      "basename": "readme",
-      "path": "readme.md"
-    },
-    {
-      "basename": "tasks-index",
-      "path": "tasks-index.md"
-    },
-    {
       "basename": "tasks-workspace",
       "path": "tasks-workspace.md"
-    },
-    {
-      "basename": "css",
-      "path": "docs/草稿/前端/core/css.md"
     },
     {
       "basename": "Sass",
@@ -51,10 +131,6 @@
     {
       "basename": "obsidian.prac",
       "path": "docs/锐化思维/tools/obsidian.prac.md"
-    },
-    {
-      "basename": "github",
-      "path": "docs/草稿/DevOps/github.md"
     },
     {
       "basename": "fuck math",
@@ -97,10 +173,6 @@
       "path": "docs-me/school/memory.md"
     },
     {
-      "basename": "javascript",
-      "path": "docs/草稿/前端/core/javascript.md"
-    },
-    {
       "basename": "计算机网络",
       "path": "考研/408/计算机网络/计算机网络.md"
     },
@@ -127,74 +199,6 @@
     {
       "basename": "readme",
       "path": "assets-win/readme.md"
-    },
-    {
-      "basename": "数据结构",
-      "path": "考研/408/数据结构/数据结构.md"
-    },
-    {
-      "basename": "README",
-      "path": "docs-hard/数学/README.md"
-    },
-    {
-      "basename": "《数据结构》基本概念",
-      "path": "assets-win/考研数据结构/杂/《数据结构》基本概念.pdf"
-    },
-    {
-      "basename": "23王道-数据结构",
-      "path": "assets-win/考研408/王道/23王道-数据结构.pdf"
-    },
-    {
-      "basename": "计算机组成原理",
-      "path": "考研/408/计算机组成原理/计算机组成原理.md"
-    },
-    {
-      "basename": "操作系统",
-      "path": "考研/408/操作系统/操作系统.md"
-    },
-    {
-      "basename": "操作系统.main",
-      "path": "考研/408/操作系统/操作系统.main.md"
-    },
-    {
-      "basename": "计算机网络.main",
-      "path": "考研/408/计算机网络/计算机网络.main.md"
-    },
-    {
-      "basename": "计算机组成原理.main",
-      "path": "考研/408/计算机组成原理/计算机组成原理.main.md"
-    },
-    {
-      "basename": "数据结构.main",
-      "path": "考研/408/数据结构/数据结构.main.md"
-    },
-    {
-      "basename": "PostCSS",
-      "path": "docs/草稿/前端/css/PostCSS.md"
-    },
-    {
-      "basename": "web-main",
-      "path": "docs/草稿/前端/core/web-main.md"
-    },
-    {
-      "basename": "js-tools-main",
-      "path": "docs/草稿/前端/js-tools/js-tools-main.md"
-    },
-    {
-      "basename": "readme",
-      "path": "quick/exe/analysis/readme.md"
-    },
-    {
-      "basename": "灵感",
-      "path": "trash/default_vault/core/灵感.md"
-    },
-    {
-      "basename": "灵感",
-      "path": "trash/灵感.md"
-    },
-    {
-      "basename": "http",
-      "path": "docs/草稿/前端/core/http.md"
     }
   ],
   "omittedPaths": [],

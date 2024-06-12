@@ -10,12 +10,13 @@ import {
 	EditorSuggestTriggerInfo,
 	Editor,
 	EditorSuggestContext,
-	ButtonComponent
+	ButtonComponent, MarkdownRenderChild
 } from 'obsidian';
 import {WorkspaceLeaf,ItemView} from 'obsidian'
 import {mode_action,action} from 'apis/els'
 import {git, repos, git_conf, rest, get_tree_rec, get_tree_items, Node} from 'apis/github-req'
 import './my.css'
+import {createWebWorkerHandler} from "@octokit/oauth-app";
 
 // module_settings
 type Module = 'default' | 'git' | 'file_manager'
@@ -37,7 +38,6 @@ class MyPluginSettingTab extends PluginSettingTab {
 export default class MyPlugin extends Plugin {
 	async onload() {
 		console.log('onload')
-
 
 		// module_pdf_opender
 		//@ts-ignore
@@ -148,7 +148,7 @@ export default class MyPlugin extends Plugin {
 			content: base64_str,
 			message: `upload file: ${now.commit}`
 		})
-		console.log(res)
+		// console.log(res)
 		return res.data.content
 	}
 	async file_to_base64(file: File, cb: (base64_str: string)=>any){
@@ -357,7 +357,7 @@ export default class MyPlugin extends Plugin {
 		this.addRibbonIcon(!this.app.isMobile ? 'toggle-left' : 'toggle-right', 'switch platform', (e)=>this.app.emulateMobile(!this.app.isMobile))
 	}
 
-	module_query_remote_repo(){
+	async module_query_remote_repo(){
 		this.registerView('my-view-type', (leaf)=>new MyItemView(leaf, this))
 
 		// this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf)=>{
@@ -366,12 +366,11 @@ export default class MyPlugin extends Plugin {
 
 		this.addRibbonIcon('github', 'open obsidian-public',async ()=>{
 			let l = this.app.workspace.getLeaf(true)
-			await l.setViewState({type: 'my-view-type', state: {a: 'b'}})
-			// this.app.workspace.revealLeaf(l)
+			await l.setViewState({type: 'my-view-type'})
+			this.app.workspace.revealLeaf(l)
 		})
-		// let l = this.app.workspace.getLeaf(true)
-		// l.setViewState({type: 'my-view-type', state: {}})
-		// this.app.workspace.revealLeaf(l)
+		let l = this.app.workspace.getLeftLeaf(false)
+		await l?.setViewState({type: 'my-view-type'})
 
 		this.register(()=>{
 			// console.log(this.app.workspace.getLeavesOfType('my-view-type'))
@@ -395,7 +394,7 @@ export default class MyPlugin extends Plugin {
 			}
 			await this.save_setting('git')
 		}
-		console.log(nodes)
+		// console.log(nodes)
 
 		let get_el = async (nodes: Node[])=>{
 			let el = createEl('div', {cls: 'tree-item-children nav-folder-children'})
@@ -425,24 +424,27 @@ export default class MyPlugin extends Plugin {
 					file.createEl('div', {cls: 'tree-item-self is-clickable nav-file-title'})
 						.createEl('div', {cls: 'tree-item-inner nav-file-title-content', text: `${label}  (${v.data.size})`, attr: {'data-path': v.data.path}})
 						.onclick = ()=>{
-						let {path,sha} = v.data
-						let spl = path.split('.'), suf = spl[spl.length-1], name = path.replace(`.${suf}`,'')
-						let url = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${path}?sha=${sha}`
-						let paste = ''
-						if (path.startsWith('image') || ['png','gif'].contains(suf)){
-							paste = `![](${url})`
-						}else if (path.startsWith('video')){
-							paste = `<video controls width="300"><source src="${url}" type="video/mp4" /></video>`
-						}else if (path.startsWith('audio')){
-							paste = `<audio controls="" controlslist="" src="${url}"></audio>`
-						}else{
-							paste = url
-						}
-						navigator.clipboard.writeText(paste)
-						new Notice('copied')
+							let {path,sha} = v.data
+							let spl = path.split('.'), suf = spl[spl.length-1], name = path.replace(`.${suf}`,'')
+							let url = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${path}?sha=${sha}`
+							let paste = ''
+							if (['bmp', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'avif']
+								.contains(suf)){
+								paste = `![](${url})`
+							}else if (['mp4', 'webm', 'ogv', 'mov', 'mkv']
+								.contains(suf)){
+								paste = `<video controls width="300"><source src="${url}" type="video/mp4" /></video>`
+							}else if (['mp3', 'wav', 'm4a', '3gp', 'flac', 'ogg', 'oga', 'opus']
+								.contains(suf)){
+								paste = `<audio controls="" controlslist="" src="${url}"></audio>`
+							}else{
+								paste = url
+							}
+							navigator.clipboard.writeText(paste)
+							new Notice('copied')
 
-						console.log(paste)
-					}
+							console.log(paste)
+						}
 					file.createEl('div', {cls: 'tree-item-children'})
 				}
 			}
@@ -474,6 +476,7 @@ export default class MyPlugin extends Plugin {
 
 		this.registerMarkdownPostProcessor((el, ctx)=>{
 			let codeblocks = el.findAll('code')
+			// console.log(codeblocks)
 			let arr = []
 			for (let cb of codeblocks){
 				let text = cb.innerText.trim()
@@ -510,6 +513,48 @@ export default class MyPlugin extends Plugin {
 				})
 			table.setAttr('style', 'width: 95%')
 		})
+
+		let netease_block = (lang: string, type: number, height: number, width = '95%')=>{
+			this.registerMarkdownCodeBlockProcessor(lang, (source, el, ctx)=>{
+				let frame = (id: string | number)=>{
+					return createEl('iframe', {cls: 'iframe',attr: {src: `https://music.163.com/outchain/player?type=${type}&id=${id}&&height=${height}`,
+							width, height: height+20}})
+				}
+
+				let ids = []
+				try {
+					ids = JSON.parse(source)
+				}catch (e){
+					el.appendText(`${lang}: parse error`)
+				}
+				if (Array.isArray(ids)) {
+					ids.forEach((v: string | number) => {
+						el.appendChild(frame(v))
+					})
+				}else {
+					el.appendText(`${lang}: data is not an string/number array`)
+				}
+			})
+		}
+		// 歌单 list
+		netease_block('netease-s', 0, 32)
+		netease_block('netease-m', 0, 90)
+		// netease_block('netease-l', 0, 430)
+		netease_block('netease-l', 0, 460)
+		netease_block('netease-l-s', 0, 32)
+		netease_block('netease-l-m', 0, 90)
+		netease_block('netease-l-l', 0, 430)
+		// 专辑 album
+		netease_block('netease-a-s', 1, 32)
+		netease_block('netease-a-m', 1, 90)
+		netease_block('netease-a-l', 1, 430)
+		// 歌曲 song
+		netease_block('netease-s-l', 2, 32)
+		netease_block('netease-s-m', 2, 66)
+
+		let sb = this.addStatusBarItem()
+		sb.appendChild(createEl('iframe', {attr: {src: `https://music.163.com/outchain/player?type=${0}&id=${10146142535}&&height=${32}`,
+				width: '300', height: 32+20, }}))
 	}
 
 	module_code_complement(){
@@ -530,35 +575,22 @@ class MyItemView extends ItemView{
 
 	async onOpen(){
 		this.icon = 'book-up'
-		this.app.workspace.revealLeaf(this.leaf)
+		// this.app.workspace.revealLeaf(this.leaf)
 		let btn = new ButtonComponent(this.contentEl.createEl('div'))
 			.setIcon('refresh-ccw')
 		btn.buttonEl.style.margin = '0 auto'
 		btn.buttonEl.style.display = 'block'
-		let boby = this.contentEl.createEl('div')
-		boby.appendChild(await this.ob.get_tree_el('obsidian-public', true))
-		btn.onClick(async (e)=>{
-			boby.remove()
-			boby = this.contentEl.createEl('div')
-			boby.appendChild(await this.ob.get_tree_el('obsidian-public', true))
-		})
-
-
-		// let select = createEl('select')
-		// this.contentEl.appendChild(select)
-		// select.onchange = async ()=>{
-		// 	let opt = select.options[select.options.selectedIndex]
-		// 	// this.contentEl.appendChild(await this.get_tree_el(opt.value))
-		// }
-		// let rps = (await repos.listForUser({username: 'liangxiongsl'})).data
-		//
-		// for (let i = 0; i < rps.length; i++) {
-		// 	let v = rps[i]
-		// 	select.appendChild(createEl('option', {value: v.name, text: v.name}))
-		// 	console.log(v.name)
-		// 	this.contentEl.appendChild(await this.ob.get_tree_el(v.name))
-		// }
-
+		// btn.setClass('a-circle')
+		this.boby = this.contentEl.createEl('div')
+		this.boby.appendChild(await this.ob.get_tree_el('obsidian-public', false))
+		btn.onClick(async (e)=>await this.update())
+	}
+	boby: HTMLElement
+	async update(){
+		let now = await this.ob.get_tree_el('obsidian-public', true)
+		this.boby.remove()
+		this.boby = this.contentEl.createEl('div')
+		this.boby.appendChild(now)
 	}
 }
 

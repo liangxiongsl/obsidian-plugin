@@ -2158,6 +2158,11 @@ ROMu
 RCW
 Roww
 RNIeD
+RequestMapping
+RequestParam
+RequestHeader
+RequestBody
+Reactive
 api
 auth
 await
@@ -4501,6 +4506,12 @@ aUJc
 aiXE
 aNJh
 aasd
+ahead
+applicationContext
+artifactId
+aspectjweaver
+aspectj
+aop
 git
 github
 gitee
@@ -6439,6 +6450,7 @@ gfX
 gmc
 gDc
 gEkZ
+groupId
 Git
 GET
 Gooreplacer
@@ -8750,6 +8762,9 @@ GkY
 GDb
 GEjR
 GgG
+Getter
+GetMapping
+Groovy
 url
 user
 ui
@@ -12453,6 +12468,8 @@ bSj
 bIM
 bHa
 bXb
+bean
+beans
 main
 media
 markdown
@@ -14660,6 +14677,10 @@ mbO
 mjc
 mZzA
 mle
+mapper
+mothed
+messaging
+mybatis
 API
 Accept
 AvASQWST
@@ -16886,6 +16907,9 @@ ANq
 Azh
 ANT
 AtTZ
+Aspect
+AnnotationApplicationContext
+Annotations
 types
 text
 type
@@ -20875,6 +20899,8 @@ peK
 pvaD
 pBt
 pltD
+prototype
+pool
 npm
 new
 null
@@ -26580,6 +26606,11 @@ jZG
 jUK
 jLa
 jXF
+jcp
+jdbc
+javax
+jstl
+junit
 import
 issues
 image
@@ -31079,6 +31110,8 @@ ODV
 OKcO
 OLX
 OrV
+Old
+Oriented
 from
 file
 files
@@ -34958,6 +34991,9 @@ cFi
 cNn
 caZ
 controlslist
+classpath
+callbacks
+connector
 request
 repos
 repo
@@ -38946,6 +38982,7 @@ lbA
 lHC
 lqb
 lgK
+lifecycle
 POST
 PyQt
 Python
@@ -41053,6 +41090,11 @@ PMvEs
 Pgh
 PTX
 PfGyX
+Plain
+PostMapping
+PathVariable
+Portlet
+Programming
 Hello
 HOST
 High
@@ -43211,6 +43253,7 @@ HwG
 Hofi
 HNAG
 HMtE
+HashCode
 world
 wsgi
 web
@@ -45145,6 +45188,9 @@ wBXf
 wlzRZ
 wCz
 wURp
+webmvc
+websocket
+wen
 headers
 html
 hYihAOhyJa
@@ -53521,6 +53567,10 @@ soft
 sCOI
 sIX
 saT
+spring
+singleton
+scope
+springframework
 eqT
 easyui
 export
@@ -57518,6 +57568,9 @@ BTN
 BQaQh
 BGK
 BEQ
+Bean
+Binding
+BeanDefinition
 xc
 xlsx
 xxx
@@ -61967,6 +62020,9 @@ MIJ
 MjV
 Mns
 MkF
+ModelAttribute
+Messaging
+Maven
 QQ
 QuerySet
 QueryDict
@@ -66615,6 +66671,10 @@ DMkMA
 DevfPp
 DHK
 DHW
+DAO
+Dependency
+DTD
+Displaying
 qq
 quote
 quick
@@ -70721,6 +70781,9 @@ dxP
 dCH
 dmv
 dMk
+doctype
+declare
+dababase
 Java
 JavaScript
 James
@@ -72617,6 +72680,9 @@ JiyM
 JCJt
 JQl
 JOh
+JDBC
+JUnit
+Jakarta
 EE
 ENGINE
 ExampleModel
@@ -74584,6 +74650,8 @@ Ekp
 EiJU
 Elb
 EmjU
+Entity
+Equals
 NPM
 NULL
 NAME
@@ -80710,6 +80778,9 @@ Ifj
 IEnN
 IMD
 IGg
+IOC
+Injection
+Inversion
 Field
 ForeignKey
 FastApi
@@ -86680,6 +86751,10 @@ SbU
 Ssmk
 SkWx
 Sye
+Source
+Setter
+SessionAttributes
+SpEL
 Cg
 Compelling
 Contemporary
@@ -88822,6 +88897,10 @@ CCws
 CfJ
 CkS
 CczV
+CookieValue
+Container
+Configuration
+Common
 Think
 Text
 Thinking
@@ -90674,6 +90753,8 @@ TYa
 Tmwi
 TSOE
 TrT
+ToString
+TestNG
 Velasquez
 Value
 Velleman
@@ -92438,6 +92519,7 @@ VKGo
 VsK
 VYg
 VJqm
+Validation
 Kwame
 Knight
 Kent
@@ -96666,6 +96748,7 @@ WZQ
 WwBf
 WKsss
 Wwl
+WebSocket
 Zill
 Zak
 Zuckerman
@@ -106890,6 +106973,7 @@ XBoxi
 XWvH
 XBR
 XEdP
+XHTML
 ÄE
 Äp
 Än
