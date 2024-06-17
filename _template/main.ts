@@ -16,7 +16,7 @@ import {WorkspaceLeaf,ItemView} from 'obsidian'
 import {mode_action,action} from 'apis/els'
 import {git, repos, git_conf, rest, get_tree_rec, get_tree_items, Node} from 'apis/github-req'
 import './my.css'
-import {createWebWorkerHandler} from "@octokit/oauth-app";
+import {loadOml2d} from 'oh-my-live2d'
 
 // module_settings
 type Module = 'default' | 'git' | 'file_manager'
@@ -34,7 +34,6 @@ class MyPluginSettingTab extends PluginSettingTab {
 	}
 }
 
-
 export default class MyPlugin extends Plugin {
 	async onload() {
 		console.log('onload')
@@ -49,11 +48,13 @@ export default class MyPlugin extends Plugin {
 
 		this.module_general_actions()
 
-		this.module_query_remote_repo()
+		await this.module_query_remote_repo()
 
 		this.module_editor_render()
 
 		this.module_code_complement()
+
+		this.module_commands_register()
 	}
 
 	onunload() {
@@ -552,14 +553,22 @@ export default class MyPlugin extends Plugin {
 		netease_block('netease-s-l', 2, 32)
 		netease_block('netease-s-m', 2, 66)
 
-		let sb = this.addStatusBarItem()
-		sb.appendChild(createEl('iframe', {attr: {src: `https://music.163.com/outchain/player?type=${0}&id=${10146142535}&&height=${32}`,
-				width: '300', height: 32+20, }}))
+		// let sb = this.addStatusBarItem()
+		// sb.appendChild(createEl('iframe', {attr: {src: `https://music.163.com/outchain/player?type=${0}&id=${10146142535}&&height=${32}`,
+		// 		width: '300', height: 32+20, }}))
 	}
 
 	module_code_complement(){
 		let suggest = new MyEditorSuggest(this.app)
 		// this.registerEditorSuggest(suggest)
+	}
+
+	module_commands_register(){
+		this.addCommand({id: 'osv', name: 'open surfing view', callback: ()=>{
+				let el = document.querySelector('.workspace-split.mod-vertical.mod-root .workspace-tab-header-new-tab>.clickable-icon[aria-label="新标签页"]')
+				//@ts-ignore
+				el.click()
+			}, hotkeys: [{modifiers: ['Ctrl', 'Shift'], key: 'n'}]})
 	}
 }
 

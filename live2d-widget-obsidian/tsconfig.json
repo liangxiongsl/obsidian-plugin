@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "baseUrl": "src",
+        "inlineSourceMap": true,
+        "inlineSources": false,
+        "module": "ESNext",
+        "target": "es2016",
+        "allowJs": false,
+        "noImplicitAny": false, // 不允许隐式的any类型
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "strict": true,
+        "allowSyntheticDefaultImports": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "downlevelIteration": true,
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "importHelpers": true,
+        "lib": ["dom", "es5", "scripthost", "es2016"],
+        "outDir": ""
+    },
+    "include": ["src/*.ts", "src/typings/components.d.ts", "src/components/components.d.ts", "src/components/colorPicker.ts"],
+    "exclude": ["lib/*"]
+}

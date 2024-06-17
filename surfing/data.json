@@ -18,7 +18,7 @@
   "customHighlightFormat": false,
   "highlightFormat": "[{CONTENT}]({URL})",
   "highlightInSameTab": false,
-  "openInSameTab": false,
+  "openInSameTab": true,
   "showRefreshButton": false,
   "openInObsidianWeb": false,
   "useCustomIcons": false,
@@ -60,5 +60,6 @@
     }
   ],
   "enableHtmlPreview": true,
-  "supportLivePreviewInlineUrl": false
+  "supportLivePreviewInlineUrl": false,
+  "enableTreeView": false
 }
